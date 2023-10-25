@@ -1,4 +1,4 @@
-package com.small.o2o.comp.config;
+package com.small.o2o.comp.config.common;
 
 
 

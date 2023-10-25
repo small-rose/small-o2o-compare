@@ -123,3 +123,16 @@ logging:
     com.cppic.obgenerator.small: debug
 
 
+data-sources:
+  - name: datasource1
+    url: jdbc:mysql://localhost:3306/db1
+    username: username1
+    password: password1
+  - name: datasource1
+    url: jdbc:mysql://localhost:3306/db1
+    username: username1
+    password: password1
+  - name: datasource1
+    url: jdbc:mysql://localhost:3306/db1
+    username: username1
+    password: password1

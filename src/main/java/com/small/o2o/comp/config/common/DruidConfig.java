@@ -1,4 +1,4 @@
-package com.small.o2o.comp.config;
+package com.small.o2o.comp.config.common;
 
 import com.alibaba.druid.support.http.StatViewServlet;
 import com.alibaba.druid.support.http.WebStatFilter;
