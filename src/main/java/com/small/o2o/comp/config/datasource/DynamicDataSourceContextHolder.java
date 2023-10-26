@@ -43,6 +43,7 @@ public class DynamicDataSourceContextHolder {
         //log.info("移除{}数据源", getDataSourceType());
         if (!DataSourcesType.DEFAULT.name().equals(getDataSourceType())) {
             contextHolder.remove();
+            log.info("移除{}数据源", getDataSourceType());
         }
 
     }

@@ -13,7 +13,6 @@ import lombok.Data;
 @Data
 public class DataSourceInfo {
 
-    private int id ;
     private String name ;
     private String driverName ;
     private String url ;
@@ -22,4 +21,18 @@ public class DataSourceInfo {
     private String ifValid ;
     private String ext1 ;
     private String ext2 ;
+
+    @Override
+    public String toString() {
+        return "DataSourceInfo{" +
+                ", name='" + name + '\'' +
+                ", driverName='" + driverName + '\'' +
+                ", url='" + url + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", ifValid='" + ifValid + '\'' +
+                ", ext1='" + ext1 + '\'' +
+                ", ext2='" + ext2 + '\'' +
+                '}';
+    }
 }

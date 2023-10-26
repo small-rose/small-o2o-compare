@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -22,7 +21,7 @@ import java.util.List;
 public class Ob03JdbcTemplateService {
 
     @Autowired
-    @Qualifier(value = "ob03JdbcTemplate")
+    //@Qualifier(value = "ob03JdbcTemplate")
     private JdbcTemplate jdbcTemplate ;
 
     public void execute(String sql){

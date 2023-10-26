@@ -5,7 +5,6 @@ import com.small.o2o.comp.module.utils.CamelCaseUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -20,7 +19,7 @@ import java.util.List;
 public class OracleJdbcTemplateService {
 
     @Autowired
-    @Qualifier(value = "oracleJdbcTemplate")
+    //@Qualifier(value = "oracleJdbcTemplate")
     private JdbcTemplate jdbcTemplate ;
 
 
