@@ -1,6 +1,6 @@
 package com.small.o2o.comp.sql;
 
-import com.small.o2o.comp.SpringBooTest;
+import com.small.o2o.comp.base.SmallO2oCompAppTest;
 import com.small.o2o.comp.module.facade.IndexFacadeService;
 import com.small.o2o.comp.module.facade.OraclePkRepairService;
 import org.junit.jupiter.api.Test;
@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class GenerateIndexCompareTest extends SpringBooTest {
+public class GenerateIndexCompareTest extends SmallO2oCompAppTest {
 
     @Autowired
     private IndexFacadeService indexFacadeService ;

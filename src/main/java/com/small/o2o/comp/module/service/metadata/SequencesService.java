@@ -1,10 +1,10 @@
 package com.small.o2o.comp.module.service.metadata;
 
 
-import com.small.o2o.comp.module.service.ob.ObMetaDataService;
-import com.small.o2o.comp.module.service.oracle.OracleMetaDataService;
-import com.small.o2o.comp.module.vo.ObSequencesVO;
-import com.small.o2o.comp.module.vo.OracleSequencesVO;
+import com.small.o2o.comp.config.datasource.DynamicDSContextHolder;
+import com.small.o2o.comp.module.service.meta.QueryMetaService;
+import com.small.o2o.comp.module.facade.FilePickService;
+import com.small.o2o.comp.module.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,19 +22,22 @@ import java.util.stream.Collectors;
 public class SequencesService {
 
     @Autowired
-    private ObMetaDataService obMetaDataService;
-    @Autowired
-    private OracleMetaDataService oracleMetaDataService;
+    private QueryMetaService queryMetaService;
+
+    private FilePickService filePickService ;
 
 
 
-
-    public List<OracleSequencesVO> getSequences() {
+    public List<OracleSequencesVO> getSequences(DSCompareVO dscVO) {
 
         List<String> allNames = new ArrayList<>();
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
+        List<ObSequencesVO> obObjList = queryMetaService.querySequencesVO(queryPramsVO);
+        DynamicDSContextHolder.removeDataSourceType();
 
-        List<ObSequencesVO> obObjList = obMetaDataService.querySequencesVO();
-        List<ObSequencesVO> oraObjList = oracleMetaDataService.querySequencesVO();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
+        List<ObSequencesVO> oraObjList = queryMetaService.querySequencesVO(queryPramsVO2);
+        DynamicDSContextHolder.removeDataSourceType();
 
         obObjList.forEach(p -> allNames.add(p.getSequenceName()));
         oraObjList.forEach(p -> {

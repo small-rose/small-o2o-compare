@@ -4,7 +4,7 @@ package com.small.o2o.comp.module.vo;
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
-import com.small.o2o.comp.module.excel.SheetDataVO;
+import com.small.o2o.comp.core.excel.SheetDataVO;
 import lombok.Data;
 
 @Data

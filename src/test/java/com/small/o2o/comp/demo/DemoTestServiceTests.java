@@ -1,7 +1,7 @@
 package com.small.o2o.comp.demo;
 
-import com.small.o2o.comp.SpringBooTest;
-import com.small.o2o.comp.module.service.demo.DemoTestService;
+import com.small.o2o.comp.base.SmallO2oCompAppTest;
+import com.small.o2o.comp.module.demo.DemoTestService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @Date ：2023/10/26 22:13
  * @Version ： 1.0
  **/
-public class DemoTestServiceTests extends SpringBooTest {
+public class DemoTestServiceTests extends SmallO2oCompAppTest {
 
     @Autowired
     private DemoTestService demoTestService;

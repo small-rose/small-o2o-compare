@@ -1,7 +1,9 @@
 package com.small.o2o.comp.module.service.metadata;
 
-import com.small.o2o.comp.module.service.ob.ObMetaDataService;
-import com.small.o2o.comp.module.service.oracle.OracleMetaDataService;
+import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
+import com.small.o2o.comp.module.service.meta.QueryMetaService;
+import com.small.o2o.comp.module.vo.DSCompareVO;
+import com.small.o2o.comp.module.vo.DSQueryPramsVO;
 import com.small.o2o.comp.module.vo.ObTypesVO;
 import com.small.o2o.comp.module.vo.OracleTypesVO;
 import lombok.extern.slf4j.Slf4j;
@@ -20,26 +22,23 @@ import java.util.stream.Collectors;
 public class TypeListService {
 
     @Autowired
-    private ObMetaDataService obMetaDataService;
-    @Autowired
-    private OracleMetaDataService oracleMetaDataService;
+    private QueryMetaService queryMetaService;
 
 
 
     public List<OracleTypesVO> getTypeList() {
-        List<String> obNames = new ArrayList<>();
-        List<String> oraNames = new ArrayList<>();
 
-        List<ObTypesVO> typesVOList = obMetaDataService.queryTypesVO("");
-        List<ObTypesVO> typesVOList2 = oracleMetaDataService.queryTypesVO("");
-
-        typesVOList.stream().forEach(p -> obNames.add(p.getTypeName()));
-        typesVOList2.stream().forEach(p -> oraNames.add(p.getTypeName()));
+        DSCompareVO dsCompare = MetaDataContextHolder.getDsCompare();
+        ;
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dsCompare.getDsFirst()).type("").build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dsCompare.getDsFirst()).type("").build();
+        List<ObTypesVO> typesVOList = queryMetaService.queryTypesVO(queryPramsVO);
+        List<ObTypesVO> typesVOList2 = queryMetaService.queryTypesVO(queryPramsVO2);
 
         List<String> allNames = new ArrayList<>();
-        //获取一个包含了oldIds和newIds的总结合,但是没有去重
-        allNames.addAll(obNames);
-        allNames.addAll(oraNames);
+        typesVOList.stream().forEach(p -> allNames.add(p.getTypeName()));
+        typesVOList2.stream().forEach(p -> allNames.add(p.getTypeName()));
+
         //去重，获取并集 对象 新集合
         List<String> joinNames = allNames.stream().distinct().collect(Collectors.toList());
 

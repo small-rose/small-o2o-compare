@@ -1,11 +1,11 @@
 package com.small.o2o.comp.sql;
 
-import com.small.o2o.comp.SpringBooTest;
+import com.small.o2o.comp.base.SmallO2oCompAppTest;
 import com.small.o2o.comp.module.facade.FilePickService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class FilePickTest extends SpringBooTest {
+public class FilePickTest extends SmallO2oCompAppTest {
 
     @Autowired
     private FilePickService filePickService ;

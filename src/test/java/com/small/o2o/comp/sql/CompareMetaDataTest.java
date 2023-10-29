@@ -1,13 +1,13 @@
 package com.small.o2o.comp.sql;
 
 
-import com.small.o2o.comp.SpringBooTest;
+import com.small.o2o.comp.base.SmallO2oCompAppTest;
 import com.small.o2o.comp.module.facade.CompareMetaDataService;
 import com.small.o2o.comp.module.facade.TableAndColumnService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class CompareMetaDataTest extends SpringBooTest {
+public class CompareMetaDataTest extends SmallO2oCompAppTest {
 
     @Autowired
     private CompareMetaDataService compareMetaDataService ;

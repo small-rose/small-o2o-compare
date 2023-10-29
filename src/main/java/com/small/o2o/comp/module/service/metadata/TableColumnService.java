@@ -1,19 +1,17 @@
 package com.small.o2o.comp.module.service.metadata;
 
 
-import com.small.o2o.comp.module.facade.FilePickService;
-import com.small.o2o.comp.module.service.ob.ObMetaDataService;
-import com.small.o2o.comp.module.service.oracle.OracleMetaDataService;
-import com.small.o2o.comp.module.vo.ObTableColumnFullVO;
-import com.small.o2o.comp.module.vo.ObTableInfoVO;
-import com.small.o2o.comp.module.vo.OracleTableColumnFullVO;
+import cn.hutool.core.util.StrUtil;
+import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
+import com.small.o2o.comp.module.service.meta.QueryMetaService;
+import com.small.o2o.comp.module.vo.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -26,55 +24,55 @@ import java.util.stream.Collectors;
 @Service
 public class TableColumnService {
 
-    @Autowired
-    private ObMetaDataService obMetaDataService;
-    @Autowired
-    private OracleMetaDataService oracleMetaDataService;
-    @Autowired
-    private FilePickService filePickService;
 
+    @Autowired
+    private QueryMetaService queryMetaService;
 
-
-    String DDL_ADD = "ALTER TABLE %s ADD %s %s %s;";
-    String DDL_MODIFY = "ALTER TABLE %s MODIFY %s %s ";
     /**
      * 表的列对比
      *
      * @return
      */
-    public List<OracleTableColumnFullVO> getTableColumnFulls(String mytableName, boolean onlychayi) {
-        List<String> ddlList = new ArrayList<>();
-        String ddlpath = "E:\\obgenerator\\ora_ddl.sql";
-
-        List<OracleTableColumnFullVO> resultList = new ArrayList<>();
-        //List<String> tableList = allTables;//getAllTables();
+    public List<OracleTableColumnFullVO> getTableColumnFulls() {
         List<String> tableList = new ArrayList<>();
+        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
+        List<ObTableInfoVO> allTableList = MetaDataContextHolder.getAllTableList();
+        if (CollectionUtils.isEmpty(allTableList)){
+            List<String> tempList = new ArrayList<>();
+            //重新查询
+            DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).tableName(dscVO.getTable()).build();
+            List<ObTableInfoVO> obObjList = queryMetaService.queryTableInfo(queryPramsVO);
+            obObjList.forEach(t-> tempList.add(t.getTableName()));
 
+            DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).tableName(dscVO.getTable()).build();
+            List<ObTableInfoVO> obObjList2 = queryMetaService.queryTableInfo(queryPramsVO2);;
+            obObjList2.forEach(t-> tempList.add(t.getTableName()));
 
-        if (onlychayi){
-            tableList = filePickService.getChayiListTable();
+            tableList = tempList.stream().distinct().collect(Collectors.toList());
+
         }else{
-            List<ObTableInfoVO> obObjList2 = obMetaDataService.queryTableInfo(mytableName);;
+
+            DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).tableName(dscVO.getTable()).build();
+            List<ObTableInfoVO> obObjList2 = queryMetaService.queryTableInfo(queryPramsVO);;
             for (ObTableInfoVO tableInfoVO : obObjList2) {
                 tableList.add(tableInfoVO.getTableName());
             }
         }
 
+        List<OracleTableColumnFullVO> resultList = new ArrayList<>();
 
-        // 146张不要的表
-        List<String> table = filePickService.get146Table();
-        Map<String, String> tableMap = new HashMap<>();
-        for (String t : table) {
-            tableMap.put(t,t);
-        }
         List<String> allNames = new ArrayList<>();
         int tableNo = 1;
         OracleTableColumnFullVO object = null;
-        StringBuilder sb = new StringBuilder("");
-        for (String tableName : tableList) {
 
-            List<ObTableColumnFullVO> obObjList = obMetaDataService.queryTableColmnFullVO(tableName);
-            List<ObTableColumnFullVO> oraObjList = oracleMetaDataService.queryTableColmnFullVO(tableName);
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
+
+        for (String tableName : tableList) {
+            queryPramsVO.setTableName(tableName);
+            List<ObTableColumnFullVO> obObjList = queryMetaService.queryTableColmnFullVO(queryPramsVO);
+            queryPramsVO.setTableName(tableName);
+            List<ObTableColumnFullVO> oraObjList = queryMetaService.queryTableColmnFullVO(queryPramsVO2);
 
             Map<String, ObTableColumnFullVO> obObjMap = obObjList.stream().collect(
                     Collectors.toMap(o -> o.getTableName().concat(o.getColumnName()), (p) -> p));
@@ -140,58 +138,75 @@ public class TableColumnService {
                 //System.out.println(object);
                 resultList.add(object);
                 indexNo++;
-                /*if (resultList.size() % 5000 == 0) {
-                    System.out.println(" ---- size ---" + resultList.size());
-                }*/
-                /*
-                if (tableMap.get(tableName)!=null) {
-                    continue;
-                }
-                if (StringUtils.hasText(object.getTableName()) && StringUtils.hasText(object.getTableName2()) &&StringUtils.hasText(object.getColumnName()) && !StringUtils.hasText(object.getColumnName2())) {
-                    // ob 有 oracle 没有,需要补全
-                    String format = StrUtil.format("表 {} 的列 {} OB有 ORACLE 没有 ！！！ 缺列！！！", object.getTableName(), object.getColumnName());
-                    System.out.println(format);
-                    String ddl = String.format(DDL_ADD, tableName, object.getColumnName(), object.getDataType(), object.getExtend());
-                    ddlList.add(ddl);
-                }
-                if (!StringUtils.hasText(object.getTableName()) && !StringUtils.hasText(object.getColumnName()) && StringUtils.hasText(object.getColumnName2())) {
-                    // ob 没有 oracle 有,需要确认，然后删除或同步
-                    String format = StrUtil.format("-- 表 {} 的列 {} OB沒有 ORACLE 有 ！！！ 多列！！！", object.getTableName2(), object.getColumnName2());
-                    System.out.println(format);
-                    ddlList.add(format);
-                }
-                sb.setLength(0);
-                if (object.getTableName()!=null && object.getTableName().equals(object.getTableName2()) && object.getColumnName().equals(object.getColumnName2())) {
-                    if (object.getColumnName().equals(object.getColumnName2()) && !object.getDataType().equals(object.getDataType2())) {
-                        String format = StrUtil.format("表 {} 的列 {} 类型不一致 OB : {}  ORACLE : {} 类型長度差异", object.getTableName(), object.getColumnName(), object.getDataType(), object.getDataType2());
-                        System.out.println(format);
-                        String ddl = String.format(DDL_MODIFY, tableName, object.getColumnName(), object.getDataType());
-                        sb.append(ddl);
-                        if (StringUtils.hasText(object.getDataDefault()) && !object.getDataDefault().equals(object.getDataDefault2())){
-                            sb.append(" DEFAULT ").append(object.getDataDefault());
-                        }
-                        if (!object.getNullable().equals(object.getNullable2()) && "N".equals(object.getNullable())){
-                            sb.append(" NOT NULL ");
-                        }
-                        sb.append(";");
-                        ddlList.add(sb.toString());
-                    }
-                }*/
             }
             allNames.clear();
             //ddlList.add("-- " + tableName);
             //ddlList.add("-- ");
         }
-/*
-        File ddl = new File(ddlpath);
+
+        if (dscVO.isTableColumnDDL()){
+            genaratorDDLs(resultList);
+        }
+        return resultList ;
+    }
+
+
+    String DDL_ADD = "ALTER TABLE %s ADD %s %s %s;";
+    String DDL_MODIFY = "ALTER TABLE %s MODIFY %s %s ";
+    /**
+     * 表的列对比
+     *
+     * @return
+     */
+    public List<String> genaratorDDLs(List<OracleTableColumnFullVO> resultList) {
+        List<String> ddlList = new ArrayList<>();
+        String ddlpath = "E:\\obgenerator\\ora_ddl.sql";
+        List<String> allNames = new ArrayList<>();
+        StringBuilder sb = new StringBuilder("");
+        String tableName = "";
+        for (OracleTableColumnFullVO object : resultList) {
+            tableName = object.getTableName();
+
+            if (StringUtils.hasText(object.getTableName()) && StringUtils.hasText(object.getTableName2()) && StringUtils.hasText(object.getColumnName()) && !StringUtils.hasText(object.getColumnName2())) {
+                // ob 有 oracle 没有,需要补全
+                String format = StrUtil.format("表 {} 的列 {} OB有 ORACLE 没有 ！！！ 缺列！！！", object.getTableName(), object.getColumnName());
+                System.out.println(format);
+                String ddl = String.format(DDL_ADD, tableName, object.getColumnName(), object.getDataType(), object.getExtend());
+                ddlList.add(ddl);
+            }
+            if (!StringUtils.hasText(object.getTableName()) && !StringUtils.hasText(object.getColumnName()) && StringUtils.hasText(object.getColumnName2())) {
+                // ob 没有 oracle 有,需要确认，然后删除或同步
+                String format = StrUtil.format("-- 表 {} 的列 {} OB沒有 ORACLE 有 ！！！ 多列！！！", object.getTableName2(), object.getColumnName2());
+                System.out.println(format);
+                ddlList.add(format);
+            }
+            sb.setLength(0);
+            if (object.getTableName() != null && object.getTableName().equals(object.getTableName2()) && object.getColumnName().equals(object.getColumnName2())) {
+                if (object.getColumnName().equals(object.getColumnName2()) && !object.getDataType().equals(object.getDataType2())) {
+                    String format = StrUtil.format("表 {} 的列 {} 类型不一致 OB : {}  ORACLE : {} 类型長度差异", object.getTableName(), object.getColumnName(), object.getDataType(), object.getDataType2());
+                    System.out.println(format);
+                    String ddl = String.format(DDL_MODIFY, tableName, object.getColumnName(), object.getDataType());
+                    sb.append(ddl);
+                    if (StringUtils.hasText(object.getDataDefault()) && !object.getDataDefault().equals(object.getDataDefault2())) {
+                        sb.append(" DEFAULT ").append(object.getDataDefault());
+                    }
+                    if (!object.getNullable().equals(object.getNullable2()) && "N".equals(object.getNullable())) {
+                        sb.append(" NOT NULL ");
+                    }
+                    sb.append(";");
+                    ddlList.add(sb.toString());
+                }
+            }
+        }
+        allNames.clear();
+
+        /*File ddl = new File(ddlpath);
         if (ddl.exists()) {
             ddl.delete();
         }
         FileWriter fileWriter = new FileWriter(ddl);
-        fileWriter.appendLines(ddlList);
-*/
-
-        return resultList;
+        fileWriter.appendLines(ddlList);*/
+        return ddlList;
     }
 
 

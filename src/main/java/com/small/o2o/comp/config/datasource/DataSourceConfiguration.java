@@ -3,6 +3,7 @@ package com.small.o2o.comp.config.datasource;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson2.JSON;
 import com.small.o2o.comp.config.pojo.DataSourceInfo;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +31,7 @@ public class DataSourceConfiguration {
     @Autowired
     private InitDataSource initDataSource;
 
+    @Getter
     private List<DataSourceInfo> dataSourceConfigs ;
 
     @PostConstruct

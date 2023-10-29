@@ -1,9 +1,11 @@
 package com.small.o2o.comp.module.service.metadata;
 
 
-import com.small.o2o.comp.module.facade.FilePickService;
-import com.small.o2o.comp.module.service.ob.ObMetaDataService;
-import com.small.o2o.comp.module.service.oracle.OracleMetaDataService;
+import com.small.o2o.comp.config.datasource.DynamicDSContextHolder;
+import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
+import com.small.o2o.comp.module.service.meta.QueryMetaService;
+import com.small.o2o.comp.module.vo.DSCompareVO;
+import com.small.o2o.comp.module.vo.DSQueryPramsVO;
 import com.small.o2o.comp.module.vo.ObObjectInfoVO;
 import com.small.o2o.comp.module.vo.OracleObjectInfoVO;
 import lombok.extern.slf4j.Slf4j;
@@ -21,30 +23,29 @@ import java.util.stream.Collectors;
 @Service
 public class ObjectInfoService {
 
-
     @Autowired
-    private ObMetaDataService obMetaDataService;
-    @Autowired
-    private OracleMetaDataService oracleMetaDataService;
-    @Autowired
-    private FilePickService filePickService;
-
+    private QueryMetaService queryMetaService;
 
 
     public List<OracleObjectInfoVO> getObjectInfo() {
-        List<String> obNames = new ArrayList<>();
-        List<String> oraNames = new ArrayList<>();
 
-        List<ObObjectInfoVO> typesVOList = obMetaDataService.queryObjectInfo();
-        List<ObObjectInfoVO> typesVOList2 = oracleMetaDataService.queryObjectInfo();
+        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
 
-        typesVOList.stream().forEach(p -> obNames.add(p.getObjectType()));
-        typesVOList2.stream().forEach(p -> oraNames.add(p.getObjectType()));
+        DynamicDSContextHolder.setDataSourceType(dscVO.getDsFirst());
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
+        List<ObObjectInfoVO> typesVOList = queryMetaService.getObjectInfo(queryPramsVO);
+        DynamicDSContextHolder.removeDataSourceType();
+
+        DynamicDSContextHolder.setDataSourceType(dscVO.getDsSecond());
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).build();
+        List<ObObjectInfoVO> typesVOList2 = queryMetaService.getObjectInfo(queryPramsVO2);
+        DynamicDSContextHolder.removeDataSourceType();
+
 
         List<String> allNames = new ArrayList<>();
-        //获取一个包含了oldIds和newIds的总结合,但是没有去重
-        allNames.addAll(obNames);
-        allNames.addAll(oraNames);
+        typesVOList.forEach(p -> allNames.add(p.getObjectType()));
+        typesVOList2.forEach(p -> allNames.add(p.getObjectType()));
+
         //去重，获取并集 对象 新集合
         List<String> joinNames = allNames.stream().distinct().collect(Collectors.toList());
 

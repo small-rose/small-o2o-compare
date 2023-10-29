@@ -1,11 +1,12 @@
 package com.small.o2o.comp.module.service.metadata;
 
 
+import cn.hutool.core.util.ObjectUtil;
+import com.small.o2o.comp.config.datasource.DynamicDSContextHolder;
+import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
+import com.small.o2o.comp.module.service.meta.QueryMetaService;
 import com.small.o2o.comp.module.facade.FilePickService;
-import com.small.o2o.comp.module.service.ob.ObMetaDataService;
-import com.small.o2o.comp.module.service.oracle.OracleMetaDataService;
-import com.small.o2o.comp.module.vo.ObProcedureVO;
-import com.small.o2o.comp.module.vo.OracleProcedureVO;
+import com.small.o2o.comp.module.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,29 +24,37 @@ import java.util.stream.Collectors;
 @Service
 public class ProcedureListService {
 
+
     @Autowired
-    private ObMetaDataService obMetaDataService;
-    @Autowired
-    private OracleMetaDataService oracleMetaDataService;
-    @Autowired
+    private QueryMetaService queryMetaService;
+
     private FilePickService filePickService ;
 
+
     public List<OracleProcedureVO> getProcedureList(String type) {
+        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
+        DynamicDSContextHolder.setDataSourceType(dscVO.getDsFirst());
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).type(type).build();
+        List<ObProcedureVO> procedureVOS = queryMetaService.getProcedureList(queryPramsVO);
+        //List<ObProcedureVO> procedureVOS1 = queryMetaService.queryNameListProcedureVO(queryPramsVO);
+        DynamicDSContextHolder.removeDataSourceType();
 
-        List<String> obNames = new ArrayList<>();
-        List<String> oraNames = new ArrayList<>();
-
-        List<ObProcedureVO> procedureVOS = obMetaDataService.queryProcedureVO(type);
-        List<ObProcedureVO> procedureVOS2 = oracleMetaDataService.queryProcedureVO(type);
-
-
-        procedureVOS.stream().forEach(p -> obNames.add(p.getObjectName().concat(p.getProcedureName() == null ? "" : p.getProcedureName())));
-        procedureVOS2.stream().forEach(p -> oraNames.add(p.getObjectName().concat(p.getProcedureName() == null ? "" : p.getProcedureName())));
+        DynamicDSContextHolder.setDataSourceType(dscVO.getDsSecond());
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).type(type).build();
+        List<ObProcedureVO> procedureVOS2 = queryMetaService.getProcedureList(queryPramsVO2);
+        //List<ObProcedureVO> procedureVOS1 = queryMetaService.queryNameListProcedureVO(queryPramsVO);
+        DynamicDSContextHolder.removeDataSourceType();
 
         List<String> allNames = new ArrayList<>();
-        //获取一个包含了oldIds和newIds的总结合,但是没有去重
-        allNames.addAll(obNames);
-        allNames.addAll(oraNames);
+        procedureVOS.stream().forEach(p -> allNames.add(p.getObjectName().concat(p.getProcedureName() == null ? "" : p.getProcedureName())));
+        procedureVOS2.stream().forEach(p -> allNames.add(p.getObjectName().concat(p.getProcedureName() == null ? "" : p.getProcedureName())));
+
+        Map<String, ObProcedureVO> procedureVOMap = procedureVOS.stream().collect(
+                Collectors.toMap(p -> p.getObjectName().concat(p.getProcedureName()), (p) -> p));
+
+        Map<String, ObProcedureVO> procedureVOMap2 = procedureVOS2.stream().collect(
+                Collectors.toMap(p -> p.getObjectName().concat(p.getProcedureName()), Function.identity()));
+
         //去重，获取并集 对象 新集合
         List<String> joinNames = allNames.stream().distinct().collect(Collectors.toList());
 
@@ -62,17 +71,17 @@ public class ProcedureListService {
                 procedure.setCount1(String.valueOf(procedureVOS.size()));
                 procedure.setCount2(String.valueOf(procedureVOS2.size()));
             }
-            List<ObProcedureVO> obList = procedureVOS.stream().parallel().filter(p -> (p.getObjectName().concat(p.getProcedureName() == null ? "" : p.getProcedureName()).equals(n))).collect(Collectors.toList());
+            ObProcedureVO obLeft = procedureVOMap.get(n);
 
-            List<ObProcedureVO> oraList = procedureVOS2.stream().parallel().filter(p -> (p.getObjectName().concat(p.getProcedureName() == null ? "" : p.getProcedureName()).equals(n))).collect(Collectors.toList());
-            if (obList.size() > 0) {
-                ObProcedureVO ob = obList.get(0);
+            if (ObjectUtil.isNotNull(obLeft)) {
+                ObProcedureVO ob = obLeft;
                 procedure.setObjectType(ob.getObjectType());
                 procedure.setObjectName(ob.getObjectName());
                 procedure.setProcedureName(ob.getProcedureName());
             }
-            if (oraList.size() > 0) {
-                ObProcedureVO oracle = oraList.get(0);
+            ObProcedureVO obRight = procedureVOMap2.get(n);
+            if (ObjectUtil.isNotNull(obRight)) {
+                ObProcedureVO oracle = obRight ;
                 procedure.setObjectType2(oracle.getObjectType());
                 procedure.setObjectName2(oracle.getObjectName());
                 procedure.setProcedureName2(oracle.getProcedureName());
@@ -84,63 +93,4 @@ public class ProcedureListService {
         return resultList;
     }
 
-
-    public List<OracleProcedureVO> getProcedurePkgList(String type) {
-        List<String> obNames = new ArrayList<>();
-        List<String> oraNames = new ArrayList<>();
-
-        List<ObProcedureVO> procedureVOS = obMetaDataService.queryNameListProcedureVO(type);
-        List<ObProcedureVO> procedureVOS2 = oracleMetaDataService.queryNameListProcedureVO(type);
-
-        procedureVOS.stream().forEach(p -> obNames.add(p.getObjectName().concat(p.getProcedureName() == null ? "" : p.getProcedureName())));
-        procedureVOS2.stream().forEach(p -> oraNames.add(p.getObjectName().concat(p.getProcedureName() == null ? "" : p.getProcedureName())));
-
-        List<String> allNames = new ArrayList<>();
-        //获取一个包含了oldIds和newIds的总结合,但是没有去重
-        allNames.addAll(obNames);
-        allNames.addAll(oraNames);
-        //去重，获取并集 对象 新集合
-        List<String> joinNames = allNames.stream().distinct().collect(Collectors.toList());
-
-        List<OracleProcedureVO> resultList = new ArrayList<>();
-        OracleProcedureVO procedure = null;
-        int indexNo = 1;
-        log.info("getProcedureNameList 取并集大小为：" + joinNames.size());
-
-        List<String> plsqlUnitListTable = filePickService.getOBPlsqlUnitListTable();
-        Map<String, String> obPlsqlMap = plsqlUnitListTable.stream().collect(
-                Collectors.toMap(o -> o, Function.identity()));
-        List<String> plsqlUnitListTable2 = filePickService.getORAPlsqlUnitListTable();
-        Map<String, String> oraPlsqlMap = plsqlUnitListTable2.stream().collect(
-                Collectors.toMap(o -> o, Function.identity()));
-
-        for (String n : joinNames) {
-            procedure = new OracleProcedureVO();
-            procedure.setNo(String.valueOf(indexNo));
-            procedure.setNo2(String.valueOf(indexNo));
-            if (indexNo == 1) {
-                procedure.setCount1(String.valueOf(procedureVOS.size()));
-                procedure.setCount2(String.valueOf(procedureVOS2.size()));
-            }
-            List<ObProcedureVO> obList = procedureVOS.stream().parallel().filter(p -> (p.getObjectName().concat(p.getProcedureName() == null ? "" : p.getProcedureName()).equals(n))).collect(Collectors.toList());
-
-            List<ObProcedureVO> oraList = procedureVOS2.stream().parallel().filter(p -> (p.getObjectName().concat(p.getProcedureName() == null ? "" : p.getProcedureName()).equals(n))).collect(Collectors.toList());
-            if (obList.size() > 0) {
-                ObProcedureVO ob = obList.get(0);
-                procedure.setObjectType(ob.getObjectType());
-                procedure.setObjectName(ob.getObjectName());
-                procedure.setProcedureName(obPlsqlMap.get(ob.getObjectName()));
-            }
-            if (oraList.size() > 0) {
-                ObProcedureVO oracle = oraList.get(0);
-                procedure.setObjectType2(oracle.getObjectType());
-                procedure.setObjectName2(oracle.getObjectName());
-                procedure.setProcedureName2(oraPlsqlMap.get(oracle.getObjectName()));
-            }
-            resultList.add(procedure);
-            indexNo++;
-        }
-
-        return resultList;
-    }
 }

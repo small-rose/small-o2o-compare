@@ -3,9 +3,9 @@ package com.small.o2o.comp.module.facade.base;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import com.small.o2o.comp.module.excel.CheckCellHandler;
-import com.small.o2o.comp.module.excel.MultipleSheelPropety;
 import com.small.o2o.comp.module.facade.FilePickService;
+import com.small.o2o.comp.core.excel.CheckCellHandler;
+import com.small.o2o.comp.core.excel.MultipleSheelPropety;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 

@@ -1,20 +1,17 @@
 package com.small.o2o.comp.module.service.metadata;
 
 
+import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
+import com.small.o2o.comp.module.service.meta.QueryMetaService;
 import com.small.o2o.comp.module.facade.FilePickService;
-import com.small.o2o.comp.module.service.ob.ObMetaDataService;
-import com.small.o2o.comp.module.service.oracle.OracleMetaDataService;
-import com.small.o2o.comp.module.utils.FileRWUtils;
-import com.small.o2o.comp.module.vo.IndexExpressions;
-import com.small.o2o.comp.module.vo.ObTableIndexVO;
-import com.small.o2o.comp.module.vo.ObTableInfoVO;
-import com.small.o2o.comp.module.vo.OracleTableIndexVO;
+import com.small.o2o.comp.core.utils.FileRWUtils;
+import com.small.o2o.comp.module.vo.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -28,10 +25,9 @@ import java.util.stream.Collectors;
 public class TableIndexService {
 
     @Autowired
-    private ObMetaDataService obMetaDataService;
-    @Autowired
-    private OracleMetaDataService oracleMetaDataService;
-    @Autowired
+    private QueryMetaService queryMetaService;
+
+
     private FilePickService filePickService;
 
     String DROP_DDL = "DROP INDEX %s  ;";
@@ -41,42 +37,49 @@ public class TableIndexService {
      *
      * @return
      */
-    public List<OracleTableIndexVO> getTableIndexs(String mytableName) {
+    public List<OracleTableIndexVO> getTableIndexs(DSCompareVO dscVO) {
         List<String> ddlList = new ArrayList<>();
         List<OracleTableIndexVO> resultList = new ArrayList<>();
 
         List<String> tableList = new ArrayList<>();
 
-        boolean onlychayi = false;
-        if (onlychayi){
-            //tableList = filePickService.getChayiListTable();
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).build();
+        List<ObTableInfoVO> allTableList = MetaDataContextHolder.getAllTableList();
+        if (CollectionUtils.isEmpty(allTableList)){
+             List<String> tempList = new ArrayList<>();
+            //重新查询
+
+            List<ObTableInfoVO> obObjList = queryMetaService.queryTableInfo(queryPramsVO);
+            obObjList.forEach(t-> tempList.add(t.getTableName()));
+
+            List<ObTableInfoVO> obObjList2 = queryMetaService.queryTableInfo(queryPramsVO2);;
+            obObjList2.forEach(t-> tempList.add(t.getTableName()));
+
+            tableList = tempList.stream().distinct().collect(Collectors.toList());
+
         }else{
-            List<ObTableInfoVO> obObjList2 = obMetaDataService.queryTableInfo(mytableName);;
+             List<ObTableInfoVO> obObjList2 = queryMetaService.queryTableInfo(queryPramsVO);;
             for (ObTableInfoVO tableInfoVO : obObjList2) {
                 tableList.add(tableInfoVO.getTableName());
             }
         }
-        List<IndexExpressions> obieList = obMetaDataService.queryTableIndexExpressions("");
-        List<IndexExpressions> oraieList = oracleMetaDataService.queryTableIndexExpressions("");
+        List<IndexExpressions> obieList = queryMetaService.queryTableIndexExpressions(queryPramsVO);
+        List<IndexExpressions> oraieList = queryMetaService.queryTableIndexExpressions(queryPramsVO2);
+
         Map<String, String> obFunIndexMap = obieList.stream().collect(
                 Collectors.toMap(IndexExpressions::getIndexName, IndexExpressions::getColumnExpression));
         Map<String, String> oracleFunIndexMap = oraieList.stream().collect(
                 Collectors.toMap(IndexExpressions::getIndexName, IndexExpressions::getColumnExpression));
 
-        // 146张不要的表
-        List<String> table = filePickService.get146Table();
-        Map<String, String> tableMap = new HashMap<>();
-        for (String t : table) {
-            tableMap.put(t,t);
-        }
         int i = 0 ;
         for (String tableName : tableList) {
 
-            if (tableMap.get(tableName)!=null){
-                continue;
-            }
-            List<ObTableIndexVO> obObjList = obMetaDataService.queryTableIndexVO(tableName);
-            List<ObTableIndexVO> oraObjList = oracleMetaDataService.queryTableIndexVO(tableName);
+            queryPramsVO.setTableName(tableName);
+            List<ObTableIndexVO> obObjList = queryMetaService.queryTableIndexVO(queryPramsVO);
+            queryPramsVO2.setTableName(tableName);
+            List<ObTableIndexVO> oraObjList = queryMetaService.queryTableIndexVO(queryPramsVO2);
+
             System.out.println(i+" Table "+tableName+"  ob indexs " +obObjList.size() +" oracle indexs " +oraObjList.size());
             i++;
             if (obObjList.size()==0 && oraObjList.size()==0){

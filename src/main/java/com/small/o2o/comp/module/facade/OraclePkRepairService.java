@@ -2,15 +2,14 @@ package com.small.o2o.comp.module.facade;
 
 
 import com.alibaba.excel.metadata.Sheet;
-import com.small.o2o.comp.module.constants.OBConstants;
-import com.small.o2o.comp.module.excel.MultipleSheelPropety;
+import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.module.facade.base.CommonGenerater;
+import com.small.o2o.comp.core.excel.MultipleSheelPropety;
 import com.small.o2o.comp.module.service.oracle.OracleMetaDataService;
 import com.small.o2o.comp.module.vo.ORATablePrimaryKeyVO;
 import com.small.o2o.comp.module.vo.ObTablePrimaryKeyVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
@@ -18,8 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@Service
-public class OraclePkRepairService  extends CommonGenerater {
+ public class OraclePkRepairService  extends CommonGenerater {
 
 
     @Autowired
@@ -40,7 +38,7 @@ public class OraclePkRepairService  extends CommonGenerater {
 
     private List<MultipleSheelPropety>  getDatas() {
         ArrayList<MultipleSheelPropety> excelList = new ArrayList<>();
-        for (OBConstants.SheetNameEnum sheetEnum : OBConstants.SheetNameEnum.values()) {
+        for (O2OConstants.SheetNameEnum sheetEnum : O2OConstants.SheetNameEnum.values()) {
 
             if (12 == sheetEnum.getIndex()) {
                 log.info("开始查 " + sheetEnum.getCode());

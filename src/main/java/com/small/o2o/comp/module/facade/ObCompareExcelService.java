@@ -6,16 +6,15 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.metadata.Sheet;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import com.small.o2o.comp.module.constants.OBConstants;
-import com.small.o2o.comp.module.excel.CheckCellHandler;
-import com.small.o2o.comp.module.excel.MultipleSheelPropety;
+import com.small.o2o.comp.core.constants.O2OConstants;
+import com.small.o2o.comp.core.excel.CheckCellHandler;
+import com.small.o2o.comp.core.excel.MultipleSheelPropety;
 import com.small.o2o.comp.module.exception.QueryException;
 import com.small.o2o.comp.module.service.ob.ObMetaDataService;
 import com.small.o2o.comp.module.service.ob03.Ob03MetaDataService;
 import com.small.o2o.comp.module.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -33,8 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service
-public class ObCompareExcelService {
+ public class ObCompareExcelService {
 
     @Autowired
     private ObMetaDataService obMetaDataService;
@@ -162,7 +160,7 @@ public class ObCompareExcelService {
 
     private void getDatas(ArrayList<MultipleSheelPropety> excelList) {
 
-        for (OBConstants.SheetNameEnum sheetEnum : OBConstants.SheetNameEnum.values()) {
+        for (O2OConstants.SheetNameEnum sheetEnum : O2OConstants.SheetNameEnum.values()) {
 
             if (0 == sheetEnum.getIndex()) {
                 log.info("开始查0 " + sheetEnum.getDesc());

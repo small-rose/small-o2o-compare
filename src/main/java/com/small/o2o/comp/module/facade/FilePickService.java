@@ -3,9 +3,8 @@ package com.small.o2o.comp.module.facade;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
-import com.small.o2o.comp.module.utils.FileRWUtils;
+import com.small.o2o.comp.core.utils.FileRWUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -15,8 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
-@Service
-public class FilePickService {
+ public class FilePickService {
 
 
     String path = "E:\\ideaWork\\PT17ACC-MA\\fisservice\\src\\main\\resources\\SQL\\2022\\" ;

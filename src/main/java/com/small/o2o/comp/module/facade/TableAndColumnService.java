@@ -9,7 +9,6 @@ import com.small.o2o.comp.module.service.oracle.OracleMetaDataService;
 import com.small.o2o.comp.module.vo.ObTableInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -18,8 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service
-public class TableAndColumnService {
+ public class TableAndColumnService {
 
     @Autowired
     private ObMetaDataService obMetaDataService ;

@@ -1,11 +1,9 @@
 package com.small.o2o.comp.module.service.metadata;
 
 
-import com.small.o2o.comp.module.service.ob.ObMetaDataService;
-import com.small.o2o.comp.module.service.oracle.OracleMetaDataService;
-import com.small.o2o.comp.module.vo.ObTableInfoVO;
-import com.small.o2o.comp.module.vo.ObTablePartitionVO;
-import com.small.o2o.comp.module.vo.OracleTableInfoVO;
+import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
+import com.small.o2o.comp.module.service.meta.QueryMetaService;
+import com.small.o2o.comp.module.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,22 +23,23 @@ import java.util.stream.Collectors;
 public class TableListService {
 
     @Autowired
-    private ObMetaDataService obMetaDataService;
-    @Autowired
-    private OracleMetaDataService oracleMetaDataService;
+    private QueryMetaService queryMetaService;
+
 
     /**
      * 表-视图 对比
      *
      * @return
      */
-    public List<OracleTableInfoVO> getTableInfo(String tableType) {
+    public List<OracleTableInfoVO> getTableInfo(DSCompareVO dscVO) {
 
         //        List<String> obNames = new ArrayList<>();
         //        List<String> oraNames = new ArrayList<>();
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).build();
 
-        List<ObTableInfoVO> obObjList = obMetaDataService.queryTableInfo(tableType);
-        List<ObTableInfoVO> oraObjList = oracleMetaDataService.queryTableInfo(tableType);
+        List<ObTableInfoVO> obObjList = queryMetaService.queryTableInfo(queryPramsVO);
+        List<ObTableInfoVO> oraObjList = queryMetaService.queryTableInfo(queryPramsVO2);
 
         Map<String, ObTableInfoVO> obObjMap = obObjList.stream().collect(
                 Collectors.toMap(o -> o.getTableName(), (p) -> p));
@@ -49,17 +48,18 @@ public class TableListService {
                 Collectors.toMap(o -> o.getTableName(), Function.identity()));
 
         //OB 查分区数
-        List<ObTablePartitionVO> obTablePartitionList = obMetaDataService.queryTablePartitionVO();
+        List<ObTablePartitionVO> obTablePartitionList = queryMetaService.queryTablePartitionVO(queryPramsVO);
         Map<String, Long> obPartMap = obTablePartitionList.stream().collect(Collectors.toMap(ObTablePartitionVO::getTableName, ObTablePartitionVO::getCount));
         //OB 查记录数
-        List<ObTablePartitionVO> obRecordList = obMetaDataService.queryTableReCords();
+        List<ObTablePartitionVO> obRecordList = queryMetaService.queryTableReCords(queryPramsVO);
         Map<String, Long> obRecordMap = obRecordList.stream().collect(Collectors.toMap(ObTablePartitionVO::getTableName, ObTablePartitionVO::getCount));
 
+
         //ORACLE 查分区数
-        List<ObTablePartitionVO> oraTablePartitionList = oracleMetaDataService.queryTablePartitionVO();
+        List<ObTablePartitionVO> oraTablePartitionList = queryMetaService.queryTablePartitionVO(queryPramsVO2);
         Map<String, Long> oraPartMap = oraTablePartitionList.stream().collect(Collectors.toMap(ObTablePartitionVO::getTableName, ObTablePartitionVO::getCount));
         //ORACLE 查记录数
-        List<ObTablePartitionVO> oraRecordList = oracleMetaDataService.queryTableReCords();
+        List<ObTablePartitionVO> oraRecordList = queryMetaService.queryTableReCords(queryPramsVO2);
         //Map<String, Long> oraRecordMap = oraRecordList.stream().collect(Collectors.toMap(ObTablePartitionVO::getTableName, ObTablePartitionVO::getCount));
         Map<String, Long> oraRecordMap = new HashMap<>();
         for (ObTablePartitionVO obTablePartitionVO : oraRecordList) {
@@ -76,6 +76,10 @@ public class TableListService {
                 allTables.add(obTableInfoVO.getTableName());
             }
         }
+        List<ObTableInfoVO> cache = new ArrayList<>();
+        cache.addAll(obObjList);
+        cache.addAll(oraObjList);
+        MetaDataContextHolder.setAllTableList(cache);
 
         List<OracleTableInfoVO> resultList = new ArrayList<>();
         OracleTableInfoVO object = null;

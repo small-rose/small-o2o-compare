@@ -2,14 +2,13 @@ package com.small.o2o.comp.module.facade;
 
 
 import cn.hutool.core.io.file.FileReader;
-import com.small.o2o.comp.module.constants.OBConstants;
+import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.module.exception.QueryException;
 import com.small.o2o.comp.module.service.ob.ObMetaDataService;
 import com.small.o2o.comp.module.vo.ObProcedureVO;
 import com.small.o2o.comp.module.vo.ObTableInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,15 +18,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service
-public class CompareMetaDataService {
+ public class CompareMetaDataService {
 
     @Autowired
     private ObMetaDataService obMetaDataService ;
 
     public void compareTable(){
         // 数据库里的表
-        List<ObTableInfoVO> tableInfo = obMetaDataService.queryTableInfo(OBConstants.SheetNameEnum.TABLE_INFO.getCode());
+        List<ObTableInfoVO> tableInfo = obMetaDataService.queryTableInfo(O2OConstants.SheetNameEnum.TABLE_INFO.getCode());
 
         Map<String, String> collect = tableInfo.stream().collect(Collectors.toMap(ObTableInfoVO::getTableName, ObTableInfoVO::getTableName, (key1, key2) -> key2));
         List<String> dbTableList= new ArrayList<>(collect.keySet());
@@ -48,7 +46,7 @@ public class CompareMetaDataService {
 
     public void compareProcedures(){
         // 数据库里的表
-        List<ObProcedureVO> tableInfo = obMetaDataService.queryProcedureVO(OBConstants.SheetNameEnum.PACKAGE.getCode());
+        List<ObProcedureVO> tableInfo = obMetaDataService.queryProcedureVO(O2OConstants.SheetNameEnum.PACKAGE.getCode());
 
         Map<String, String> collect = tableInfo.stream().collect(Collectors.toMap(ObProcedureVO::getObjectName, ObProcedureVO::getObjectName, (key1, key2) -> key2));
         List<String> dbTableList= new ArrayList<>(collect.keySet());

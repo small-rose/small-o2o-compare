@@ -1,19 +1,16 @@
 package com.small.o2o.comp.module.service.metadata;
 
 
-import com.small.o2o.comp.module.facade.FilePickService;
-import com.small.o2o.comp.module.service.ob.ObMetaDataService;
-import com.small.o2o.comp.module.service.oracle.OracleMetaDataService;
-import com.small.o2o.comp.module.utils.FileRWUtils;
-import com.small.o2o.comp.module.vo.ObTableInfoVO;
-import com.small.o2o.comp.module.vo.ObTablePrimaryKeyVO;
-import com.small.o2o.comp.module.vo.OracleTablePrimaryKeyVO;
+import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
+import com.small.o2o.comp.module.service.meta.QueryMetaService;
+import com.small.o2o.comp.core.utils.FileRWUtils;
+import com.small.o2o.comp.module.vo.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -26,12 +23,11 @@ import java.util.stream.Collectors;
 @Service
 public class TablePrimaryKeyService {
 
+
     @Autowired
-    private ObMetaDataService obMetaDataService;
-    @Autowired
-    private OracleMetaDataService oracleMetaDataService;
-    @Autowired
-    private FilePickService filePickService;
+    private QueryMetaService queryMetaService;
+
+
 
     String DROP_DDL = "ALTER TABLE %s DROP CONSTRAINT %S;";
     String ADD_DDL = "ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY( %s );";
@@ -42,38 +38,42 @@ public class TablePrimaryKeyService {
      *
      * @return
      */
-    public List<OracleTablePrimaryKeyVO> getTablePrimaryKey(String mytableName) {
+    public List<OracleTablePrimaryKeyVO> getTablePrimaryKey(DSCompareVO dscVO) {
 
         List<OracleTablePrimaryKeyVO> resultList = new ArrayList<>();
 
         List<String> tableList = new ArrayList<>();
         List<String> ddlList = new ArrayList<>();
 
-        boolean onlychayi = false;
-        if (onlychayi){
-            //tableList = filePickService.getChayiListTable();
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).build();
+        List<ObTableInfoVO> allTableList = MetaDataContextHolder.getAllTableList();
+        if (CollectionUtils.isEmpty(allTableList)){
+            List<String> tempList = new ArrayList<>();
+            //重新查询
+
+            List<ObTableInfoVO> obObjList = queryMetaService.queryTableInfo(queryPramsVO);
+            obObjList.forEach(t-> tempList.add(t.getTableName()));
+
+            List<ObTableInfoVO> obObjList2 = queryMetaService.queryTableInfo(queryPramsVO2);;
+            obObjList2.forEach(t-> tempList.add(t.getTableName()));
+
+            tableList = tempList.stream().distinct().collect(Collectors.toList());
+
         }else{
-            List<ObTableInfoVO> obObjList2 = obMetaDataService.queryTableInfo(mytableName);;
+            List<ObTableInfoVO> obObjList2 = queryMetaService.queryTableInfo(queryPramsVO);;
             for (ObTableInfoVO tableInfoVO : obObjList2) {
                 tableList.add(tableInfoVO.getTableName());
             }
         }
 
-
-        // 146张不要的表
-        List<String> table = filePickService.get146Table();
-        Map<String, String> tableMap = new HashMap<>();
-        for (String t : table) {
-            tableMap.put(t,t);
-        }
         int i = 0 ;
         for (String tableName : tableList) {
 
-            if (tableMap.get(tableName)!=null){
-                continue;
-            }
-            List<ObTablePrimaryKeyVO> obObjList = obMetaDataService.queryTablePrimaryKeyVO(tableName);
-            List<ObTablePrimaryKeyVO> oraObjList = oracleMetaDataService.queryTablePrimaryKeyVO(tableName);
+            queryPramsVO.setTableName(tableName);
+            List<ObTablePrimaryKeyVO> obObjList = queryMetaService.queryTablePrimaryKeyVO(queryPramsVO);
+            queryPramsVO2.setTableName(tableName);
+            List<ObTablePrimaryKeyVO> oraObjList = queryMetaService.queryTablePrimaryKeyVO(queryPramsVO2);
             System.out.println(i+" Table primary key  "+tableName+"  ob primarykey " +obObjList.size() +" oracle primarykey " +oraObjList.size());
             i++;
             if (obObjList.size()==0 && oraObjList.size()==0){

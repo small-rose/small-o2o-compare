@@ -1,7 +1,7 @@
 package com.small.o2o.comp.sql;
 
 
-import com.small.o2o.comp.SpringBooTest;
+import com.small.o2o.comp.base.SmallO2oCompAppTest;
 import com.small.o2o.comp.module.facade.ExcelGenaratorService;
 import com.small.o2o.comp.module.facade.ProcedureFacadeService;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 
-public class GenerateProcedureExcelTest extends SpringBooTest {
+public class GenerateProcedureExcelTest extends SmallO2oCompAppTest {
 
     @Autowired
     private ExcelGenaratorService excelGenaratorService ;
