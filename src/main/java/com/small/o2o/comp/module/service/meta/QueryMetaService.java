@@ -91,4 +91,9 @@ public class QueryMetaService {
         MetaDataService metaDataService =  serviceStrategyFactory.getMetaServiceStrategy(queryPramsVO.getDataSourceName());
         return  metaDataService.queryTypesVO(queryPramsVO.getType());
     }
+    @DynamicDataSource
+    public List<ObTableViewVO> queryTableView(DSQueryPramsVO queryPramsVO) {
+        MetaDataService metaDataService =  serviceStrategyFactory.getMetaServiceStrategy(queryPramsVO.getDataSourceName());
+        return  metaDataService.queryTableView();
+    }
 }

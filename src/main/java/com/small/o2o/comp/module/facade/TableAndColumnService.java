@@ -3,9 +3,8 @@ package com.small.o2o.comp.module.facade;
 
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
-import com.small.o2o.comp.module.exception.QueryException;
-import com.small.o2o.comp.module.service.ob.ObMetaDataService;
-import com.small.o2o.comp.module.service.oracle.OracleMetaDataService;
+import com.small.o2o.comp.core.exception.QueryException;
+import com.small.o2o.comp.module.service.impl.MetaDataService;
 import com.small.o2o.comp.module.vo.ObTableInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +19,9 @@ import java.util.stream.Collectors;
  public class TableAndColumnService {
 
     @Autowired
-    private ObMetaDataService obMetaDataService ;
+    private MetaDataService obMetaDataService ;
     @Autowired
-    private OracleMetaDataService oracleMetaDataService ;
+    private MetaDataService oracleMetaDataService ;
 
 
     /**

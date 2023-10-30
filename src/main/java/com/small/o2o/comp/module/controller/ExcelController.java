@@ -33,7 +33,7 @@ public class ExcelController {
     public String delObject(@PathVariable("obj") String obj){
         try {
 
-            excelGenaratorService.delObj(obj);
+            //excelGenaratorService.delObj(obj);
             return "SUCCESS";
         }catch (Exception e){
             return "FAILED-"+e.getMessage();
@@ -47,7 +47,7 @@ public class ExcelController {
     public String procedure(@PathVariable("type") String type){
         try {
 
-            excelGenaratorService.procedure(type);
+            //excelGenaratorService.procedure(type);
             return "SUCCESS";
         }catch (Exception e){
             return "FAILED-"+e.getMessage();

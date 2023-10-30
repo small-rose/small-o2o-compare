@@ -1,5 +1,6 @@
 package com.small.o2o.comp.core.excel;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.excel.metadata.CellData;
 import com.alibaba.excel.metadata.Head;
 import com.alibaba.excel.write.handler.AbstractCellWriteHandler;
@@ -133,7 +134,7 @@ public class CheckCellHandler  extends AbstractCellWriteHandler {
 
          if (cell.getRowIndex() >= 1 && 8 <= cell.getColumnIndex() && 12 <= cell.getColumnIndex()) {
             String tabName = cell.getStringCellValue();
-            if (whiteList.contains(tabName)){
+            if (ObjectUtil.isNotNull(whiteList) && whiteList.contains(tabName)){
                 if (whiteCellStyle==null) {
                     whiteCellStyle = cell.getSheet().getWorkbook().createCellStyle();
                     //设置边框

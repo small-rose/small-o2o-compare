@@ -32,6 +32,7 @@ public class ProcedureListService {
 
 
     public List<OracleProcedureVO> getProcedureList(String type) {
+
         DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
         DynamicDSContextHolder.setDataSourceType(dscVO.getDsFirst());
         DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).type(type).build();

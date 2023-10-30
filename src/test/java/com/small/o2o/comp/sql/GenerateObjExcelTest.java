@@ -27,13 +27,13 @@ public class GenerateObjExcelTest extends SmallO2oCompAppTest {
     @Test
     public void generateExcel02(){
         String path = "E:\\test\\MetaData_ALL_TAB_COLUMN_".concat(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))).concat(".xlsx");
-        excelGenaratorService.doHandleOnlyCol(path,"",false);
+        //excelGenaratorService.doHandleOnlyCol(path,"",false);
     }
 
     @Test
     public void generateExcelTable(){
         String path = "E:\\test\\MetaData_MM_REINFOREIGNINPAYMENT_TD_".concat(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))).concat(".xlsx");
-        excelGenaratorService.doHandleOnlyCol(path, "MM_REINFOREIGNINPAYMENT_TD", false);
+        //excelGenaratorService.doHandleOnlyCol(path, "MM_REINFOREIGNINPAYMENT_TD", false);
     }
 
 
@@ -41,7 +41,7 @@ public class GenerateObjExcelTest extends SmallO2oCompAppTest {
     @Test
     public void generateExcelChayi(){
         String path = "E:\\test\\MetaData_chayi_COLUMN_".concat(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))).concat(".xlsx");
-        excelGenaratorService.doHandleOnlyCol(path,"", true);
+        //excelGenaratorService.doHandleOnlyCol(path,"", true);
     }
 
 

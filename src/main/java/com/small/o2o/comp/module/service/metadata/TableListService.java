@@ -31,10 +31,9 @@ public class TableListService {
      *
      * @return
      */
-    public List<OracleTableInfoVO> getTableInfo(DSCompareVO dscVO) {
+    public List<OracleTableInfoVO> getTableInfo( ) {
+        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
 
-        //        List<String> obNames = new ArrayList<>();
-        //        List<String> oraNames = new ArrayList<>();
         DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
         DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).build();
 
@@ -124,5 +123,65 @@ public class TableListService {
         return resultList;
     }
 
+    /**
+     *  视图查询比较结果
+     * @return
+     */
+    public List<OracleTableViewVO> getTableViewList() {
+        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
 
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).build();
+
+        List<ObTableViewVO> obObjList = queryMetaService.queryTableView(queryPramsVO);
+        List<ObTableViewVO> oraObjList = queryMetaService.queryTableView(queryPramsVO2);
+
+        Map<String, ObTableViewVO> obObjMap = obObjList.stream().collect(
+                Collectors.toMap(o -> o.getViewName(), (p) -> p));
+
+        Map<String, ObTableViewVO> oracleObjMap = oraObjList.stream().collect(
+                Collectors.toMap(o -> o.getViewName(), Function.identity()));
+
+
+
+        List<String> allTables = new ArrayList<>();
+        for (ObTableViewVO obTableInfoVO : obObjList) {
+            allTables.add(obTableInfoVO.getViewName());
+
+        }
+        for (ObTableViewVO obTableInfoVO : oraObjList) {
+            if (!allTables.contains(obTableInfoVO.getViewName())) {
+                allTables.add(obTableInfoVO.getViewName());
+            }
+        }
+
+
+        List<OracleTableViewVO> resultList = new ArrayList<>();
+        OracleTableViewVO object = null;
+        int indexNo = 1;
+        log.info("getTableInfo 取并集大小为：" + allTables.size());
+        for (String n : allTables) {
+            object = new OracleTableViewVO();
+            object.setNo(String.valueOf(indexNo));
+            object.setNo2(String.valueOf(indexNo));
+            ObTableViewVO obTiv = obObjMap.get(n);
+            ObTableViewVO oracleTiv = oracleObjMap.get(n);
+
+            if (obTiv != null) {
+                ObTableViewVO ob = obTiv;
+                object.setViewName(ob.getViewName());
+                object.setTextLength(ob.getTextLength());
+                object.setText(ob.getText());
+            }
+            if (oracleTiv != null ) {
+                ObTableViewVO oracle = oracleTiv;
+                object.setViewName2(oracle.getViewName());
+                object.setTextLength2(oracle.getTextLength());
+                object.setText2(oracle.getText());
+            }
+            resultList.add(object);
+            indexNo++;
+        }
+        return resultList;
+    }
 }

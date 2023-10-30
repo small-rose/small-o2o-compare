@@ -3,7 +3,6 @@ package com.small.o2o.comp.module.facade.base;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import com.small.o2o.comp.module.facade.FilePickService;
 import com.small.o2o.comp.core.excel.CheckCellHandler;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +15,7 @@ import java.util.List;
 @Slf4j
 public abstract class CommonGenerater {
 
-    protected FilePickService commmonFilePickService ;
+    protected  List<String> whiteListTable ;
 
 
     public void generaterExcel(String filePath, List<MultipleSheelPropety> excelList) {
@@ -31,8 +30,7 @@ public abstract class CommonGenerater {
 
         ExcelWriter excelWriter = null;
         try {
-            List<String> whiteListTable = commmonFilePickService.getWhiteListTable();
-            excelWriter = EasyExcel.write(filePath).build();
+             excelWriter = EasyExcel.write(filePath).build();
             for (int i = 0; i < excelList.size(); i++) {
                 if (!CollectionUtils.isEmpty(excelList.get(i).getData())) {
 

@@ -65,7 +65,7 @@ import java.util.List;
 
             if (13 == sheetEnum.getIndex() ) {
                 log.info("开始查 " + sheetEnum.getCode());
-                List<OracleProcedureVO> typeList = procedureListService.getProcedurePkgList(sheetEnum.getCode());
+                List<OracleProcedureVO> typeList = procedureListService.getProcedureList(sheetEnum.getCode());
                 Sheet sheet = new Sheet(sheetEnum.getIndex(), 0);
                 sheet.setSheetName(sheetEnum.getDesc());
                 MultipleSheelPropety multipleSheelPropety = new MultipleSheelPropety();

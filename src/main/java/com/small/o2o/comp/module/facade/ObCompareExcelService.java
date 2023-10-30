@@ -9,13 +9,10 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.core.excel.CheckCellHandler;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
-import com.small.o2o.comp.module.exception.QueryException;
-import com.small.o2o.comp.module.service.ob.ObMetaDataService;
-import com.small.o2o.comp.module.service.ob03.Ob03MetaDataService;
+import com.small.o2o.comp.module.service.impl.MetaDataService;
 import com.small.o2o.comp.module.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -35,9 +32,9 @@ import java.util.stream.Collectors;
  public class ObCompareExcelService {
 
     @Autowired
-    private ObMetaDataService obMetaDataService;
+    private MetaDataService obMetaDataService;
     @Autowired
-    private Ob03MetaDataService ob03MetaDataService;
+    private MetaDataService ob03MetaDataService;
     @Autowired
     private FilePickService filePickService;
 
@@ -269,7 +266,7 @@ import java.util.stream.Collectors;
     }
 
     private List<OracleTableColumnFullVO> getChaTableColumn() {
-        List<ObTableInfoVO> allTables = obMetaDataService.queryTableInfo("TABLE");
+        List<ObTableInfoVO> allTables = obMetaDataService.queryTableInfo("");
         List<String> tables = new ArrayList<>();
         for (ObTableInfoVO tableInfoVO : allTables) {
             tables.add(tableInfoVO.getTableName());
@@ -365,8 +362,8 @@ import java.util.stream.Collectors;
     private List<OracleTableInfoVO>  chaBiao(){
         List<String> obNames = new ArrayList<>();
         List<String> oraNames = new ArrayList<>();
-        List<ObTableInfoVO> obObjList = obMetaDataService.queryTableInfo("TABLE");
-        List<ObTableInfoVO> oraObjList = ob03MetaDataService.queryTableInfo("TABLE");
+        List<ObTableInfoVO> obObjList = obMetaDataService.queryTableInfo("");
+        List<ObTableInfoVO> oraObjList = ob03MetaDataService.queryTableInfo("");
 
         for (ObTableInfoVO tableInfoVO : obObjList) {
             obNames.add(tableInfoVO.getTableName());
@@ -742,8 +739,8 @@ import java.util.stream.Collectors;
 
     public List<String> getAllTables() {
         List<String> obNames = new ArrayList<>();
-        List<ObTableInfoVO> obObjList = obMetaDataService.queryTableInfo("TABLE");
-        List<ObTableInfoVO> oraObjList = ob03MetaDataService.queryTableInfo("TABLE");
+        List<ObTableInfoVO> obObjList = obMetaDataService.queryTableInfo("");
+        List<ObTableInfoVO> oraObjList = ob03MetaDataService.queryTableInfo("");
 
         obObjList.forEach(p -> obNames.add(p.getTableName()));
         oraObjList.forEach(p -> {
@@ -1014,7 +1011,7 @@ import java.util.stream.Collectors;
         ;
         return resultList;
     }
-
+/*
     @Transactional(rollbackFor = Exception.class)
     public void delObj(String obj) {
         switch (obj) {
@@ -1040,5 +1037,5 @@ import java.util.stream.Collectors;
                 throw new QueryException("枚举值非法");
         }
 
-    }
+    }*/
 }

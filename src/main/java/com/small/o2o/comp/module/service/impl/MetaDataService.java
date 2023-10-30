@@ -18,7 +18,7 @@ public interface MetaDataService {
      * 查表 或 视图
      * @return
      */
-    public List<ObTableInfoVO> queryTableInfo(String tableName);
+    public List<ObTableInfoVO> queryTableInfo(String tabType);
 
     /**
      * 查询表对应的列完整版

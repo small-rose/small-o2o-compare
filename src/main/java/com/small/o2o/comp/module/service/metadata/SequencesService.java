@@ -2,9 +2,13 @@ package com.small.o2o.comp.module.service.metadata;
 
 
 import com.small.o2o.comp.config.datasource.DynamicDSContextHolder;
-import com.small.o2o.comp.module.service.meta.QueryMetaService;
 import com.small.o2o.comp.module.facade.FilePickService;
-import com.small.o2o.comp.module.vo.*;
+import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
+import com.small.o2o.comp.module.service.meta.QueryMetaService;
+import com.small.o2o.comp.module.vo.DSCompareVO;
+import com.small.o2o.comp.module.vo.DSQueryPramsVO;
+import com.small.o2o.comp.module.vo.ObSequencesVO;
+import com.small.o2o.comp.module.vo.OracleSequencesVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +32,8 @@ public class SequencesService {
 
 
 
-    public List<OracleSequencesVO> getSequences(DSCompareVO dscVO) {
+    public List<OracleSequencesVO> getSequences() {
+        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
 
         List<String> allNames = new ArrayList<>();
         DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();

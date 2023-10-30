@@ -37,14 +37,16 @@ public class TableIndexService {
      *
      * @return
      */
-    public List<OracleTableIndexVO> getTableIndexs(DSCompareVO dscVO) {
+    public List<OracleTableIndexVO> getTableIndexs(String tabName) {
+
+        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
         List<String> ddlList = new ArrayList<>();
         List<OracleTableIndexVO> resultList = new ArrayList<>();
 
         List<String> tableList = new ArrayList<>();
 
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).build();
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).tableName(tabName).build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).tableName(tabName).build();
         List<ObTableInfoVO> allTableList = MetaDataContextHolder.getAllTableList();
         if (CollectionUtils.isEmpty(allTableList)){
              List<String> tempList = new ArrayList<>();
