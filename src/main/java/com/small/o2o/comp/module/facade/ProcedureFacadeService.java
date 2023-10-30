@@ -3,14 +3,13 @@ package com.small.o2o.comp.module.facade;
 
 import com.alibaba.excel.metadata.Sheet;
 import com.small.o2o.comp.core.constants.O2OConstants;
-import com.small.o2o.comp.module.facade.base.CommonGenerater;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
+import com.small.o2o.comp.module.facade.base.CommonGenerater;
 import com.small.o2o.comp.module.service.metadata.ProcedureListService;
 import com.small.o2o.comp.module.vo.OracleProcedureVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,10 +24,6 @@ import java.util.List;
     @Autowired
     private ProcedureListService procedureListService ;
 
-    @PostConstruct
-    public void init(){
-        commmonFilePickService = filePickService ;
-    }
 
     public void doHandle(String filePath) {
         List<MultipleSheelPropety> excelList = getDatas();

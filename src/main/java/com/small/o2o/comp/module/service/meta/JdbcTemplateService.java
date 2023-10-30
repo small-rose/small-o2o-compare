@@ -1,6 +1,6 @@
 package com.small.o2o.comp.module.service.meta;
 
-import com.small.o2o.comp.module.exception.QueryException;
+import com.small.o2o.comp.core.exception.QueryException;
 import com.small.o2o.comp.core.utils.CamelCaseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;

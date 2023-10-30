@@ -14,6 +14,7 @@ logging:
 
 
 init:
+  ds-init-type: conf
   dataSourceList:
     - name: ORACLE_DEV
       driverName: oracle.jdbc.OracleDriver

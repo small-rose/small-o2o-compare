@@ -1,12 +1,13 @@
 package com.small.o2o.comp.config.datasource;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.fastjson2.JSON;
 import com.small.o2o.comp.config.pojo.DataSourceInfo;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -21,8 +22,9 @@ import java.util.Map;
  * @date: 2023/10/24 024 23:35
  * @version: v1.0
  */
-
+@Slf4j
 @Configuration
+@DependsOn(value = "initDataSource" )
 public class DataSourceConfiguration {
 
 
@@ -34,17 +36,12 @@ public class DataSourceConfiguration {
     @Getter
     private List<DataSourceInfo> dataSourceConfigs ;
 
+
     @PostConstruct
     public void initializeDataSources() {
-        // 这里也可以从数据库加载，可以随时扩充
-        //dataSourceConfigs = jdbcTemplate.queryForList("SELECT * FROM SOC_DATASOUCE_INFO", DataSourceInfo.class);
+
         dataSourceConfigs = initDataSource.getDataSourceList();
-        System.out.println("============加载到自定义的数据源=============");
-        dataSourceConfigs.stream().forEach(e->{
-            System.out.println("------------------");
-            System.out.println(JSON.toJSONString(e));
-        });
-        System.out.println("------------------over");
+        log.info("=====加载到自定义的动态数据源完成=====");
     }
 
     @Bean

@@ -1,7 +1,6 @@
 package com.small.o2o.comp.module.service.impl;
 
-import com.small.o2o.comp.config.datasource.InitDataSource;
-import com.small.o2o.comp.config.pojo.DataSourceInfo;
+import com.small.o2o.comp.config.datasource.DataSourceTypeConfig;
 import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.core.exception.BussinessException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * @description: TODO 功能角色说明：
@@ -27,27 +25,13 @@ public class ServiceStrategyFactory {
     private ObMetaDataService obMetaDataService ;
 
     @Autowired
-    private InitDataSource initDataSource ;
+    private DataSourceTypeConfig dataSourceTypeConfig ;
 
-    private static HashMap<String, String> dataSourceMap = new HashMap<>();
+    private HashMap<String, String> dataSourceMap = new HashMap<>();
 
     @PostConstruct
     public void init(){
-        List<DataSourceInfo> dataSourceList = initDataSource.getDataSourceList();
-        dataSourceList.stream().forEach(d->{
-            if(d.getDriverName().toUpperCase().contains(O2OConstants.DBType.ORACLE.getValue())) {
-                dataSourceMap.put(d.getName(), O2OConstants.DBType.ORACLE.getValue());
-            }else  if(d.getDriverName().toUpperCase().contains(O2OConstants.DBType.OB_ORACLE.getValue())) {
-                dataSourceMap.put(d.getName(), O2OConstants.DBType.OB_ORACLE.getValue());
-            }else  if(d.getDriverName().toUpperCase().contains(O2OConstants.DBType.OB_ORACLE.getValue())) {
-                dataSourceMap.put(d.getName(), O2OConstants.DBType.OB_ORACLE.getValue());
-            }else  if(d.getDriverName().toUpperCase().contains(O2OConstants.DBType.MYSQL.getValue())) {
-                dataSourceMap.put(d.getName(), O2OConstants.DBType.MYSQL.getValue());
-            }else  if(d.getDriverName().toUpperCase().contains(O2OConstants.DBType.OB_MYSQL.getValue())) {
-                dataSourceMap.put(d.getName(), O2OConstants.DBType.OB_MYSQL.getValue());
-            }
-        });
-
+        dataSourceMap.putAll(dataSourceTypeConfig.getDataSourceTypeMap());
     }
 
 
