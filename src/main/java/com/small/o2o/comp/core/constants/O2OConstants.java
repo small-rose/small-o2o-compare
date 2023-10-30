@@ -5,6 +5,26 @@ package com.small.o2o.comp.core.constants;
  */
 public class O2OConstants {
 
+
+    public enum DsInitType{
+        CONF("conf"),
+        DATABASE( "db");
+
+        private String value ;
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        DsInitType(String value) {
+            this.value = value;
+        }
+    }
+
     public enum DBType{
         ORACLE("ORACLE"),
         OB_ORACLE( "OB_ORACLE"),
