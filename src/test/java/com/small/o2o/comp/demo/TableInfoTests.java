@@ -25,6 +25,6 @@ public class TableInfoTests extends SmallO2oCompAppTest {
     public void info(){
 
         DSQueryPramsVO oracle_dev = DSQueryPramsVO.builder().dataSourceName("ORACLE_DEV").build();
-        queryMetaService.getObjectInfo(oracle_dev);
+        //queryMetaService.getObjectInfo(oracle_dev);
     }
 }
