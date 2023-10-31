@@ -1,11 +1,56 @@
 package com.small.o2o.comp.module.service.impl;
 
-import com.small.o2o.comp.module.vo.*;
+import com.small.o2o.comp.module.vo.IndexExpressions;
+import com.small.o2o.comp.module.vo.ObObjectInfoVO;
+import com.small.o2o.comp.module.vo.ObProcedureVO;
+import com.small.o2o.comp.module.vo.ObSequencesVO;
+import com.small.o2o.comp.module.vo.ObTableColumnFullVO;
+import com.small.o2o.comp.module.vo.ObTableIndexVO;
+import com.small.o2o.comp.module.vo.ObTableInfoVO;
+import com.small.o2o.comp.module.vo.ObTablePartitionVO;
+import com.small.o2o.comp.module.vo.ObTablePrimaryKeyVO;
+import com.small.o2o.comp.module.vo.ObTableViewVO;
+import com.small.o2o.comp.module.vo.ObTypesVO;
 
 import java.util.List;
 
 public interface MetaDataService {
 
+
+    public String getDbType();
+
+
+    /**
+     *
+     * 查基本的对象信息
+     * @param sql
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    public <T> List<T> getObjectList(String sql ,Class clazz);
+
+    /**
+     * 查基本的对象信息
+     * @return
+     */
+    public String queryObjectInfoSQL();
+
+    String queryTableInfoSQL(String tableName);
+
+    String queryTableColumnFullVoSql(String tableName);
+
+    String queryTableIndexVoSQL(String tableName);
+
+    String queryTablePrimaryKeyVoSQL(String tableName);
+
+    String queryTableViewSQL();
+
+    String querySequencesVoSQL();
+
+    String queryTypesVoSQL(String metaType);
+
+    String queryProcedureVoSQL(String metaType);
 
     /**
      * 查基本的对象信息
@@ -14,6 +59,7 @@ public interface MetaDataService {
     public List<ObObjectInfoVO> queryObjectInfo();
 
 
+    
     /**
      * 查表 或 视图
      * @return
@@ -24,14 +70,9 @@ public interface MetaDataService {
      * 查询表对应的列完整版
      *
      */
-    public List<ObTableColumnFullVO> queryTableColmnFullVO(String tableName);
+    public List<ObTableColumnFullVO> queryTableColumnFullVO(String tableName);
 
-
-    /**
-     * 查表对应的列
-     * @return
-     */
-    public List<ObTableColumnVO> queryTableColumnVO(String tableName);
+ 
 
     /**
      * 查表对应的分区数
@@ -99,4 +140,7 @@ public interface MetaDataService {
      * @return
      */
     public Long queryTableCount(String tableName);
+
+
+
 }

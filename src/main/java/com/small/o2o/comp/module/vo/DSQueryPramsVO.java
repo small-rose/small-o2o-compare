@@ -16,7 +16,7 @@ import lombok.Data;
 public class DSQueryPramsVO {
 
     private String dataSourceName ;
-    private String type ;
+    private String metaType ;
     private String tableName ;
 
 

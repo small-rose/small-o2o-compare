@@ -1,13 +1,12 @@
 package com.small.o2o.comp.module.service.impl;
 
 import com.small.o2o.comp.config.datasource.DataSourceTypeConfig;
-import com.small.o2o.comp.core.constants.O2OConstants;
-import com.small.o2o.comp.core.exception.BussinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * @description: TODO 功能角色说明：
@@ -20,9 +19,7 @@ import java.util.HashMap;
 public class ServiceStrategyFactory {
 
     @Autowired
-    private OracleMetaDataService oracleMetaDataService ;
-    @Autowired
-    private ObMetaDataService obMetaDataService ;
+    private List<MetaDataService> metaDataServiceList ;
 
     @Autowired
     private DataSourceTypeConfig dataSourceTypeConfig ;
@@ -38,18 +35,20 @@ public class ServiceStrategyFactory {
     public MetaDataService getMetaServiceStrategy(String dataSourceName) {
 
         String dsName = dataSourceMap.get(dataSourceName);
-        if (O2OConstants.DBType.ORACLE.getValue().equals(dsName)) {
+        return metaDataServiceList.stream().filter(s->(dsName.equalsIgnoreCase(s.getDbType()))).findFirst().get();
+
+       /* if (O2OConstants.DBType.ORACLE.getValue().equals(dsName)) {
             return oracleMetaDataService;
         } else if (O2OConstants.DBType.OB_ORACLE.getValue().equals(dsName)) {
             return obMetaDataService;
-        } /*else if (O2OConstants.DBType.MYSQL.getValue().equals(dsName)) {
+        } else if (O2OConstants.DBType.MYSQL.getValue().equals(dsName)) {
             return obMetaDataService;
         } else if (O2OConstants.DBType.OB_MYSQL.getValue().equals(dsName)) {
             return obMetaDataService;
-        } */else {
+        }else {
             // 默认策略
             throw new BussinessException("不支持的数据库类型: "+dataSourceName);
-        }
+        }*/
     }
 
 }

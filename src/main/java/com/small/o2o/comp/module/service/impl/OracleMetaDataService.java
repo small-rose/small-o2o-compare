@@ -1,8 +1,20 @@
 package com.small.o2o.comp.module.service.impl;
 
 
+import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.module.service.meta.JdbcTemplateService;
-import com.small.o2o.comp.module.vo.*;
+import com.small.o2o.comp.module.vo.IndexExpressions;
+import com.small.o2o.comp.module.vo.ObObjectInfoVO;
+import com.small.o2o.comp.module.vo.ObProcedureVO;
+import com.small.o2o.comp.module.vo.ObSequencesVO;
+import com.small.o2o.comp.module.vo.ObTableColumnFullVO;
+import com.small.o2o.comp.module.vo.ObTableIndexVO;
+import com.small.o2o.comp.module.vo.ObTableInfoVO;
+import com.small.o2o.comp.module.vo.ObTablePartitionVO;
+import com.small.o2o.comp.module.vo.ObTablePrimaryKeyVO;
+import com.small.o2o.comp.module.vo.ObTableViewVO;
+import com.small.o2o.comp.module.vo.ObTypesVO;
+import com.small.o2o.comp.module.vo.OraTableYasuoVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +30,19 @@ public class OracleMetaDataService  implements MetaDataService {
     private JdbcTemplateService jdbcTemplateService ;
 
 
+    @Override
+    public String getDbType() {
+        return O2OConstants.DBType.ORACLE.getValue();
+    }
+
+
+
+    @Override
+    public <T> List<T> getObjectList(String sql, Class clazz) {
+        return jdbcTemplateService.queryForList(sql, clazz);
+    }
+
+    @Override
     public List<ObObjectInfoVO> queryObjectInfo() {
         String sql = "SELECT OBJECT_TYPE, COUNT FROM " +
                 "(SELECT OBJECT_TYPE, COUNT(1) COUNT FROM USER_OBJECTS  GROUP BY OBJECT_TYPE --ORDER BY OBJECT_TYPE\n" +
@@ -27,10 +52,20 @@ public class OracleMetaDataService  implements MetaDataService {
         return jdbcTemplateService.queryForList(sql, ObObjectInfoVO.class);
     }
 
+    @Override
+    public String queryObjectInfoSQL() {
+        return  "SELECT OBJECT_TYPE, COUNT FROM " +
+                "(SELECT OBJECT_TYPE, COUNT(1) COUNT FROM USER_OBJECTS  GROUP BY OBJECT_TYPE --ORDER BY OBJECT_TYPE\n" +
+                "    UNION ALL\n" +
+                "SELECT 'INDEX-' || UNIQUENESS  OBJECT_TYPE , COUNT(1) COUNT FROM USER_INDEXES GROUP BY UNIQUENESS)\n" +
+                "ORDER BY OBJECT_TYPE " ;
+    }
+
     /**
      * 查表
      * @return
      */
+    @Override
     public List<ObTableInfoVO> queryTableInfo(String tableType){
         String sql = "SELECT t1.TABLE_NAME , t2.COMMENTS , t1.STATUS , t1.TEMPORARY  " +
                 "FROM USER_ALL_TABLES t1 join USER_TAB_COMMENTS t2 on t1.TABLE_NAME=t2.TABLE_NAME  WHERE T2.TABLE_TYPE='TABLE' ";
@@ -44,7 +79,8 @@ public class OracleMetaDataService  implements MetaDataService {
      * 查询表对应的列完整版
      *
      */
-    public List<ObTableColumnFullVO> queryTableColmnFullVO(String tableName){
+    @Override
+    public List<ObTableColumnFullVO> queryTableColumnFullVO(String tableName){
         String sql = "SELECT  TC.TABLE_NAME,  TC.COLUMN_NAME,\n" +
                 "       CASE  WHEN TC.DATA_TYPE='DATE' THEN  TC.DATA_TYPE\n" +
                 "            WHEN TC.DATA_TYPE='NUMBER' THEN  " +
@@ -71,24 +107,13 @@ public class OracleMetaDataService  implements MetaDataService {
         return jdbcTemplateService.queryForList(sql, ObTableColumnFullVO.class);
     }
 
-    /**
-     * 查表对应的列
-     * @return
-     */
-    public List<ObTableColumnVO> queryTableColumnVO(String tableName){
-        String sql = "SELECT  TC.TABLE_NAME,  TC.COLUMN_NAME, TC.DATA_TYPE,TC.DATA_LENGTH  " +
-                "FROM USER_TAB_COLUMNS TC  " ;
-        if (StringUtils.hasText(tableName)){
-            sql += "WHERE TC.TABLE_NAME = '"+tableName+"' ";
-        }
-        sql += "ORDER BY TC.TABLE_NAME  , TC.COLUMN_ID ASC ";
-        return jdbcTemplateService.queryForList(sql, ObTableColumnVO.class);
-    }
+
 
     /**
      * 查表对应的分区数
      * @return
      */
+    @Override
     public List<ObTablePartitionVO> queryTablePartitionVO(){
         String sql = "SELECT TABLE_NAME, COUNT(*) count FROM SYS.USER_TAB_PARTITIONS GROUP BY TABLE_NAME" ;
         return jdbcTemplateService.queryForList(sql, ObTablePartitionVO.class);
@@ -98,6 +123,7 @@ public class OracleMetaDataService  implements MetaDataService {
      * 查表对应的记录数
      * @return
      */
+    @Override
     public List<ObTablePartitionVO> queryTableReCords(){
         String sql = "SELECT TABLE_NAME, NUM_ROWS  COUNT FROM SYS.USER_TABLES " ;
         return jdbcTemplateService.queryForList(sql, ObTablePartitionVO.class);
@@ -107,6 +133,7 @@ public class OracleMetaDataService  implements MetaDataService {
      * 查 序列
      * @return
      */
+    @Override
     public List<ObSequencesVO> querySequencesVO(){
         String sql = "SELECT T.SEQUENCE_NAME, T.LAST_NUMBER  FROM USER_SEQUENCES T ORDER BY T.SEQUENCE_NAME " ;
         return jdbcTemplateService.queryForList(sql, ObSequencesVO.class);
@@ -116,6 +143,7 @@ public class OracleMetaDataService  implements MetaDataService {
      * 查 表主键
      * @return
      */
+    @Override
     public List<ObTablePrimaryKeyVO> queryTablePrimaryKeyVO(String tableName){
         String sql = "select cu.TABLE_NAME ,cu.CONSTRAINT_NAME ,LISTAGG(cu.COLUMN_NAME, ',')WITHIN GROUP(ORDER BY cu.TABLE_NAME,cu.COLUMN_NAME) as COLUMN_NAME " +
                 "from user_cons_columns cu, user_constraints au where cu.constraint_name = au.constraint_name and au.constraint_type = 'P' " ;
@@ -131,6 +159,7 @@ public class OracleMetaDataService  implements MetaDataService {
      * 查 表索引-函数式索引表达式
      * @return
      */
+    @Override
     public List<IndexExpressions> queryTableIndexExpressions(String tableName){
         String sql = " SELECT T.TABLE_NAME, T.INDEX_NAME,\n" +
                 "       LISTAGG(COLUMN_EXPRESSION ||' ASC',',')WITHIN GROUP(ORDER BY T.TABLE_NAME, T.INDEX_NAME,T.COLUMN_EXPRESSION) AS COLUMN_EXPRESSION\n" +
@@ -147,6 +176,7 @@ public class OracleMetaDataService  implements MetaDataService {
      * 查 表索引
      * @return
      */
+    @Override
     public List<ObTableIndexVO> queryTableIndexVO(String tableName){
         String sql = "SELECT T.TABLE_NAME,T.INDEX_NAME,\n" +
                 "LISTAGG(CASE I.INDEX_TYPE WHEN 'NORMAL' THEN T.COLUMN_NAME ||' ' || T.DESCEND\n" +
@@ -161,6 +191,7 @@ public class OracleMetaDataService  implements MetaDataService {
     }
 
 
+    @Override
     public List<ObTableViewVO> queryTableView() {
         String sql = "SELECT VIEW_NAME, TEXT_LENGTH, TEXT FROM USER_VIEWS " ;
         return jdbcTemplateService.queryForList(sql, ObTableViewVO.class);
@@ -170,6 +201,7 @@ public class OracleMetaDataService  implements MetaDataService {
      * 查 PACKAGE/PROCEDURE/FUNCTION
      * @return
      */
+    @Override
     public List<ObProcedureVO> queryProcedureVO(String type){
         String sql = "SELECT OBJECT_TYPE, OBJECT_NAME, PROCEDURE_NAME FROM user_procedures  " ;
         if (StringUtils.hasText(type)){
@@ -185,6 +217,7 @@ public class OracleMetaDataService  implements MetaDataService {
      *
      * @return
      */
+    @Override
     public List<ObProcedureVO> queryNameListProcedureVO(String type){
         String sql = "SELECT distinct OBJECT_TYPE, OBJECT_NAME FROM user_procedures  " ;
         if (StringUtils.hasText(type)){
@@ -198,6 +231,7 @@ public class OracleMetaDataService  implements MetaDataService {
      * 查 TYPE 集合
      * @return
      */
+    @Override
     public List<ObTypesVO> queryTypesVO(String type){
         String sql = "SELECT TYPE_NAME, TYPECODE FROM USER_TYPES " ;
         if (StringUtils.hasText(type)){
@@ -226,6 +260,7 @@ public class OracleMetaDataService  implements MetaDataService {
      * @param tableName
      * @return
      */
+    @Override
     public Long queryTableCount(String tableName){
         String sql = "SELECT COUNT(1) FROM  "+tableName;
         return jdbcTemplateService.queryOneColumn(sql, Long.class);

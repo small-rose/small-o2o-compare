@@ -6,6 +6,19 @@ package com.small.o2o.comp.core.constants;
 public class O2OConstants {
 
 
+    public static final String SQL_OBJECT = "OBJECT";
+    public static final String SQL_TABLE = "TABLE";
+    public static final String SQL_VIEW = "VIEW";
+    public static final String SQL_TABLE_COLUMN = "TABLE_COLUMN";
+    public static final String SQL_TABLE_PRIMARYKEY = "PRIMARYKEY";
+    public static final String SQL_TABLE_INDEX = "INDEX";
+    public static final String SQL_SEQUENCES = "SEQUENCES";
+    public static final String SQL_TYPE = "TYPE";
+    public static final String SQL_FUNCTION = "FUNCTION";
+    public static final String SQL_PROCEDURE = "PROCEDURE";
+    public static final String SQL_PACKAGE = "PACKAGE";
+
+
     public enum DsInitType{
         CONF("conf"),
         DATABASE( "db");

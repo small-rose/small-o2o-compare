@@ -44,7 +44,7 @@ public class TableColumnService {
             List<ObTableInfoVO> obObjList = queryMetaService.queryTableInfo(queryPramsVO);
             obObjList.forEach(t-> tempList.add(t.getTableName()));
 
-            DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).tableName(dscVO.getTable()).build();
+            DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).tableName(dscVO.getTable()).build();
             List<ObTableInfoVO> obObjList2 = queryMetaService.queryTableInfo(queryPramsVO2);;
             obObjList2.forEach(t-> tempList.add(t.getTableName()));
 
@@ -66,13 +66,13 @@ public class TableColumnService {
         OracleTableColumnFullVO object = null;
 
         DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).build();
 
         for (String tableName : tableList) {
             queryPramsVO.setTableName(tableName);
-            List<ObTableColumnFullVO> obObjList = queryMetaService.queryTableColmnFullVO(queryPramsVO);
+            List<ObTableColumnFullVO> obObjList = queryMetaService.queryTableColumnFullVO(queryPramsVO);
             queryPramsVO.setTableName(tableName);
-            List<ObTableColumnFullVO> oraObjList = queryMetaService.queryTableColmnFullVO(queryPramsVO2);
+            List<ObTableColumnFullVO> oraObjList = queryMetaService.queryTableColumnFullVO(queryPramsVO2);
 
             Map<String, ObTableColumnFullVO> obObjMap = obObjList.stream().collect(
                     Collectors.toMap(o -> o.getTableName().concat(o.getColumnName()), (p) -> p));

@@ -40,7 +40,7 @@ public class SequencesService {
         List<ObSequencesVO> obObjList = queryMetaService.querySequencesVO(queryPramsVO);
         DynamicDSContextHolder.removeDataSourceType();
 
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).build();
         List<ObSequencesVO> oraObjList = queryMetaService.querySequencesVO(queryPramsVO2);
         DynamicDSContextHolder.removeDataSourceType();
 

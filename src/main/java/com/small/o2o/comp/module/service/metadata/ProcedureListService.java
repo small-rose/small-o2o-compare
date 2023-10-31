@@ -35,13 +35,13 @@ public class ProcedureListService {
 
         DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
         DynamicDSContextHolder.setDataSourceType(dscVO.getDsFirst());
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).type(type).build();
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).metaType(type).build();
         List<ObProcedureVO> procedureVOS = queryMetaService.getProcedureList(queryPramsVO);
         //List<ObProcedureVO> procedureVOS1 = queryMetaService.queryNameListProcedureVO(queryPramsVO);
         DynamicDSContextHolder.removeDataSourceType();
 
         DynamicDSContextHolder.setDataSourceType(dscVO.getDsSecond());
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).type(type).build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).metaType(type).build();
         List<ObProcedureVO> procedureVOS2 = queryMetaService.getProcedureList(queryPramsVO2);
         //List<ObProcedureVO> procedureVOS1 = queryMetaService.queryNameListProcedureVO(queryPramsVO);
         DynamicDSContextHolder.removeDataSourceType();

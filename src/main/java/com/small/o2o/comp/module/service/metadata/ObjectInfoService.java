@@ -2,6 +2,7 @@ package com.small.o2o.comp.module.service.metadata;
 
 
 import com.small.o2o.comp.config.datasource.DynamicDSContextHolder;
+import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.meta.QueryMetaService;
 import com.small.o2o.comp.module.vo.DSCompareVO;
@@ -33,7 +34,8 @@ public class ObjectInfoService {
 
         DynamicDSContextHolder.setDataSourceType(dscVO.getDsFirst());
         DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
-        List<ObObjectInfoVO> typesVOList = queryMetaService.getObjectInfo(queryPramsVO);
+        //List<ObObjectInfoVO> typesVOList = queryMetaService.getObjectInfo(queryPramsVO);
+        List<ObObjectInfoVO> typesVOList = queryMetaService.getObjectList(queryPramsVO, ObObjectInfoVO.class, O2OConstants.SQL_TYPE);
         DynamicDSContextHolder.removeDataSourceType();
 
         DynamicDSContextHolder.setDataSourceType(dscVO.getDsSecond());

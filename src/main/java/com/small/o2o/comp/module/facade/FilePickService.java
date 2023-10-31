@@ -5,6 +5,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
 import com.small.o2o.comp.core.utils.FileRWUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,8 +15,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
- public class FilePickService {
+@Component
+public class FilePickService {
 
+
+    public List<String> getFileLines(String filePath){
+        FileReader reader = new FileReader(filePath);
+        List<String> table = reader.readLines();
+        return table ;
+    }
 
     String path = "E:\\ideaWork\\PT17ACC-MA\\fisservice\\src\\main\\resources\\SQL\\2022\\" ;
 
@@ -103,12 +111,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
     }
 
-    public List<String> get146Table(){
-        FileReader reader = new FileReader("E:\\obgenerator\\ora_146.txt");
-        List<String> table = reader.readLines();
-        return table ;
 
-    }
 
     public List<String> getWhiteListTable(){
         FileReader reader = new FileReader("E:\\obgenerator\\Keep_table.txt");
@@ -117,25 +120,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
     }
 
-    public List<String> getChayiListTable(){
-        FileReader reader = new FileReader("E:\\obgenerator\\chayi.txt");
-        List<String> table = reader.readLines();
-        return table ;
-
-    }
-
-
-    public List<String> getOBPlsqlUnitListTable(){
-        FileReader reader = new FileReader("E:\\obgenerator\\ob_plsqlunit_37.txt");
-        List<String> table = reader.readLines();
-        return table ;
-    }
-
-    public List<String> getORAPlsqlUnitListTable(){
-        FileReader reader = new FileReader("E:\\obgenerator\\ora_plsqlunit_49.txt");
-        List<String> table = reader.readLines();
-        return table ;
-    }
 
     public void searchKeys(String target, String key1,String key2){
         File file = new File(target);

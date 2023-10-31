@@ -3,7 +3,7 @@ package com.small.o2o.comp.sql;
 
 import com.small.o2o.comp.base.SmallO2oCompAppTest;
 import com.small.o2o.comp.module.facade.ExcelGenaratorService;
-import com.small.o2o.comp.module.facade.ObCompareExcelService;
+import com.small.o2o.comp.module.facade.OracleCompareExcelService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,7 +16,7 @@ public class GenerateObjExcelTest extends SmallO2oCompAppTest {
     @Autowired
     private ExcelGenaratorService excelGenaratorService ;
     @Autowired
-    private ObCompareExcelService obCompareExcelService ;
+    private OracleCompareExcelService obCompareExcelService ;
 
     @Test
     public void generateExcel(){

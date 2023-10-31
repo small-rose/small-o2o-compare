@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -47,7 +48,7 @@ public class CompareMetaDataService extends MetaDataCompare {
     @Override
     protected boolean check() {
         DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
-        if (!ObjectUtil.isNotNull(dscVO)){
+        if (!ObjectUtil.isNotNull(dscVO) || !StringUtils.hasText(dscVO.getDsFirst()) || !StringUtils.hasText(dscVO.getDsSecond())){
             throw new DataCheckException("未发现需要比较的数据源！");
         }
         return true ;

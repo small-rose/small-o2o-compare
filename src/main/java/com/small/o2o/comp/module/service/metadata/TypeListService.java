@@ -30,8 +30,8 @@ public class TypeListService {
 
         DSCompareVO dsCompare = MetaDataContextHolder.getDsCompare();
         ;
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dsCompare.getDsFirst()).type("").build();
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dsCompare.getDsFirst()).type("").build();
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dsCompare.getDsFirst()).metaType("").build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dsCompare.getDsSecond()).metaType("").build();
         List<ObTypesVO> typesVOList = queryMetaService.queryTypesVO(queryPramsVO);
         List<ObTypesVO> typesVOList2 = queryMetaService.queryTypesVO(queryPramsVO2);
 
