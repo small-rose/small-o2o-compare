@@ -60,7 +60,7 @@ public class O2OConstants {
         }
     }
 
-    public enum SheetNameEnum{
+    public enum MetaBuzTypeEnum {
         OBJECT_INFO(0, "OBJECT","元数据信息汇总"),
         TABLE_INFO(1, "TABLE","表信息"),
         TableColumnVO(2, "TABLE_COLUMN","表对应的列"),
@@ -83,7 +83,7 @@ public class O2OConstants {
         private String code ;
         private String desc ;
 
-        SheetNameEnum(int index, String code, String desc) {
+        MetaBuzTypeEnum(int index, String code, String desc) {
             this.index = index;
             this.code = code;
             this.desc = desc;
@@ -113,8 +113,8 @@ public class O2OConstants {
             this.desc = desc;
         }
 
-        public static SheetNameEnum getSheetNameEnum(int index) {
-            for(SheetNameEnum sheetNameEnum : SheetNameEnum.values()){
+        public static MetaBuzTypeEnum getSheetNameEnum(int index) {
+            for(MetaBuzTypeEnum sheetNameEnum : MetaBuzTypeEnum.values()){
                 if (index==sheetNameEnum.getIndex()){
                     return sheetNameEnum ;
                 }

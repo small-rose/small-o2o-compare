@@ -15,6 +15,6 @@ public class OracleCompareExcelService {
 
 
    public void compareGenerateExcel(String path) {
-      compareMetaDataService.doCompareHandler(path);
+      compareMetaDataService.doCompareHandler(null);
    }
 }

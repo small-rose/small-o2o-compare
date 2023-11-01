@@ -1,6 +1,7 @@
 package com.small.o2o.comp.module.service.impl;
 
 import com.small.o2o.comp.config.datasource.DataSourceTypeConfig;
+import com.small.o2o.comp.module.service.oracle.BuzTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +20,11 @@ import java.util.List;
 public class ServiceStrategyFactory {
 
     @Autowired
-    private List<MetaDataService> metaDataServiceList ;
+    private List<MetaDbTypeSQLService> metaDataServiceList ;
+
+    @Autowired
+    private List<BuzTypeService> buzTypeServiceList ;
+
 
     @Autowired
     private DataSourceTypeConfig dataSourceTypeConfig ;
@@ -32,7 +37,7 @@ public class ServiceStrategyFactory {
     }
 
 
-    public MetaDataService getMetaServiceStrategy(String dataSourceName) {
+    public MetaDbTypeSQLService getDbTypeServiceStrategy(String dataSourceName) {
 
         String dsName = dataSourceMap.get(dataSourceName);
         return metaDataServiceList.stream().filter(s->(dsName.equalsIgnoreCase(s.getDbType()))).findFirst().get();
@@ -51,4 +56,9 @@ public class ServiceStrategyFactory {
         }*/
     }
 
+
+    public BuzTypeService getBuzTypeServiceStrategy(String buzType) {
+
+         return buzTypeServiceList.stream().filter(s->(buzType.equalsIgnoreCase(s.getBuzType()))).findFirst().get();
+    }
 }

@@ -38,16 +38,16 @@ public class DataSourceTypeConfig {
         dataSourceConfigs.stream().forEach(d->{
              System.out.println(" 解析到数据源 >>> "+JSON.toJSONString(d));
             if(d.getDriverName().toUpperCase().contains(O2OConstants.DBType.ORACLE.getValue())) {
-                dataSourceTypeMap.put(d.getName(), O2OConstants.DBType.ORACLE.getValue());
+                dataSourceTypeMap.put(d.getName().toUpperCase(), O2OConstants.DBType.ORACLE.getValue());
                 log.info("============识别到自定义的数据源数据库类型>>> "+O2OConstants.DBType.ORACLE.getValue());
             }else  if(d.getDriverName().toUpperCase().contains(O2OConstants.DBType.OB_ORACLE.getValue())) {
-                dataSourceTypeMap.put(d.getName(), O2OConstants.DBType.OB_ORACLE.getValue());
+                dataSourceTypeMap.put(d.getName().toUpperCase(), O2OConstants.DBType.OB_ORACLE.getValue());
                 log.info("============识别到自定义的数据源数据库类型>>> "+O2OConstants.DBType.OB_ORACLE.getValue());
             }else  if(d.getDriverName().toUpperCase().contains(O2OConstants.DBType.MYSQL.getValue())) {
-                dataSourceTypeMap.put(d.getName(), O2OConstants.DBType.MYSQL.getValue());
+                dataSourceTypeMap.put(d.getName().toUpperCase(), O2OConstants.DBType.MYSQL.getValue());
                 log.info("============识别到自定义的数据源数据库类型>>> "+O2OConstants.DBType.MYSQL.getValue());
             }else  if(d.getDriverName().toUpperCase().contains(O2OConstants.DBType.OB_MYSQL.getValue())) {
-                dataSourceTypeMap.put(d.getName(), O2OConstants.DBType.OB_MYSQL.getValue());
+                dataSourceTypeMap.put(d.getName().toUpperCase(), O2OConstants.DBType.OB_MYSQL.getValue());
                 log.info("============识别到自定义的数据源数据库类型>>> "+O2OConstants.DBType.OB_MYSQL.getValue());
             }else {
                 throw new DataCheckException("暂不支持比较的数据源！");

@@ -1,7 +1,8 @@
-package com.small.o2o.comp.module.service.metadata;
+package com.small.o2o.comp.module.service.oracle;
 
+import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
-import com.small.o2o.comp.module.service.meta.QueryMetaService;
+import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
 import com.small.o2o.comp.module.vo.DSCompareVO;
 import com.small.o2o.comp.module.vo.DSQueryPramsVO;
 import com.small.o2o.comp.module.vo.ObTypesVO;
@@ -9,6 +10,7 @@ import com.small.o2o.comp.module.vo.OracleTypesVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +21,20 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class TypeListService {
+public class TypeListService implements BuzTypeService{
 
     @Autowired
-    private QueryMetaService queryMetaService;
+    private QueryMetaDataService queryMetaService;
 
+    @Override
+    public String getBuzType() {
+        return O2OConstants.MetaBuzTypeEnum.TYPE.getCode();
+    }
 
+    @Override
+    public  List getCompareMetaList(DSQueryPramsVO queryPramsVO, Class clazz) {
+        return getTypeList();
+    }
 
     public List<OracleTypesVO> getTypeList() {
 
@@ -32,13 +42,16 @@ public class TypeListService {
         ;
         DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dsCompare.getDsFirst()).metaType("").build();
         DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dsCompare.getDsSecond()).metaType("").build();
-        List<ObTypesVO> typesVOList = queryMetaService.queryTypesVO(queryPramsVO);
-        List<ObTypesVO> typesVOList2 = queryMetaService.queryTypesVO(queryPramsVO2);
+        List<ObTypesVO> typesVOList = queryMetaService.queryObjectList(queryPramsVO, ObTypesVO.class);
+        List<ObTypesVO> typesVOList2 = queryMetaService.queryObjectList(queryPramsVO2, ObTypesVO.class);
 
         List<String> allNames = new ArrayList<>();
-        typesVOList.stream().forEach(p -> allNames.add(p.getTypeName()));
-        typesVOList2.stream().forEach(p -> allNames.add(p.getTypeName()));
-
+        if (!ObjectUtils.isEmpty(typesVOList)) {
+            typesVOList.stream().forEach(p -> allNames.add(p.getTypeName()));
+        }
+        if (!ObjectUtils.isEmpty(typesVOList2)) {
+            typesVOList2.stream().forEach(p -> allNames.add(p.getTypeName()));
+        }
         //去重，获取并集 对象 新集合
         List<String> joinNames = allNames.stream().distinct().collect(Collectors.toList());
 

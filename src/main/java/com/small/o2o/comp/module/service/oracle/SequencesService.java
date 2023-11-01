@@ -1,10 +1,11 @@
-package com.small.o2o.comp.module.service.metadata;
+package com.small.o2o.comp.module.service.oracle;
 
 
 import com.small.o2o.comp.config.datasource.DynamicDSContextHolder;
+import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.module.facade.FilePickService;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
-import com.small.o2o.comp.module.service.meta.QueryMetaService;
+import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
 import com.small.o2o.comp.module.vo.DSCompareVO;
 import com.small.o2o.comp.module.vo.DSQueryPramsVO;
 import com.small.o2o.comp.module.vo.ObSequencesVO;
@@ -12,6 +13,7 @@ import com.small.o2o.comp.module.vo.OracleSequencesVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,34 +25,46 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class SequencesService {
+public class SequencesService  implements BuzTypeService {
 
     @Autowired
-    private QueryMetaService queryMetaService;
+    private QueryMetaDataService queryMetaService;
 
     private FilePickService filePickService ;
 
+    @Override
+    public String getBuzType() {
+        return O2OConstants.MetaBuzTypeEnum.SEQUENCES.getCode();
+    }
+
+    @Override
+    public  List getCompareMetaList(DSQueryPramsVO queryPramsVO, Class clazz) {
+        return getSequences();
+    }
 
 
     public List<OracleSequencesVO> getSequences() {
         DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
 
         List<String> allNames = new ArrayList<>();
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
-        List<ObSequencesVO> obObjList = queryMetaService.querySequencesVO(queryPramsVO);
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
+        List<ObSequencesVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObSequencesVO.class);
         DynamicDSContextHolder.removeDataSourceType();
 
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).build();
-        List<ObSequencesVO> oraObjList = queryMetaService.querySequencesVO(queryPramsVO2);
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
+        List<ObSequencesVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObSequencesVO.class);
         DynamicDSContextHolder.removeDataSourceType();
 
-        obObjList.forEach(p -> allNames.add(p.getSequenceName()));
-        oraObjList.forEach(p -> {
-            if (allNames.contains(p.getSequenceName())) {
-                allNames.add(p.getSequenceName());
-
-            }
-        });
+        if (!ObjectUtils.isEmpty(obObjList)) {
+            obObjList.forEach(p -> allNames.add(p.getSequenceName()));
+        }
+        if (!ObjectUtils.isEmpty(oraObjList)) {
+            oraObjList.forEach(p -> {
+                if (allNames.contains(p.getSequenceName())) {
+                    allNames.add(p.getSequenceName());
+                }
+            });
+        }
 
         List<OracleSequencesVO> resultList = new ArrayList<>();
         OracleSequencesVO sequences = null;
@@ -83,7 +97,15 @@ public class SequencesService {
             resultList.add(sequences);
             indexNo++;
         }
-        ;
+
+        if (ObjectUtils.isEmpty(resultList)){
+            sequences = new OracleSequencesVO();
+            sequences.setNo(String.valueOf(indexNo));
+            sequences.setNo2(String.valueOf(indexNo));
+            sequences.setSequenceName("数据源"+ dscVO.getDsFirst()+"没有"+getBuzType());
+            sequences.setSequenceName2("数据源"+ dscVO.getDsSecond()+"没有"+getBuzType());
+            resultList.add(sequences);
+        }
         return resultList;
     }
 

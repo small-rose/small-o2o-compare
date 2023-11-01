@@ -18,6 +18,6 @@ public class DSQueryPramsVO {
     private String dataSourceName ;
     private String metaType ;
     private String tableName ;
-
+    private String queryType ;
 
 }

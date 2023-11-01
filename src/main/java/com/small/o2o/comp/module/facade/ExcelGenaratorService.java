@@ -5,6 +5,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
+import com.small.o2o.comp.module.vo.DSCompareVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -20,8 +21,8 @@ import java.util.List;
     private CompareMetaDataService compareMetaDataService ;
 
 
-    public void doHandle(String filePath) {
-        compareMetaDataService.doCompareHandler(filePath);
+    public void doHandle(DSCompareVO dsCompare) {
+        compareMetaDataService.doCompareHandler(dsCompare);
     }
 
     public void doHandle(HttpServletResponse response) {

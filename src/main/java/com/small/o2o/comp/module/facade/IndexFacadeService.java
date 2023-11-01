@@ -7,9 +7,9 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.core.excel.CheckCellHandler;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
-import com.small.o2o.comp.module.service.metadata.ObjectInfoService;
-import com.small.o2o.comp.module.service.metadata.TableIndexService;
-import com.small.o2o.comp.module.service.metadata.TablePrimaryKeyService;
+import com.small.o2o.comp.module.service.oracle.ObjectInfoService;
+import com.small.o2o.comp.module.service.oracle.TableIndexService;
+import com.small.o2o.comp.module.service.oracle.TablePrimaryKeyService;
 import com.small.o2o.comp.module.vo.OracleObjectInfoVO;
 import com.small.o2o.comp.module.vo.OracleTableIndexVO;
 import com.small.o2o.comp.module.vo.OracleTablePrimaryKeyVO;
@@ -112,7 +112,7 @@ import java.util.List;
         //List<Integer> indexList = Arrays.asList(0, 4);
         for (int index : indexList) {
 
-            O2OConstants.SheetNameEnum sheetEnum = O2OConstants.SheetNameEnum.getSheetNameEnum(index);
+            O2OConstants.MetaBuzTypeEnum sheetEnum = O2OConstants.MetaBuzTypeEnum.getSheetNameEnum(index);
             if (sheetEnum==null){
                 continue;
             }

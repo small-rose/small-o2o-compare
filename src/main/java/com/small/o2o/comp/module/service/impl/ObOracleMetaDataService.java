@@ -2,7 +2,9 @@ package com.small.o2o.comp.module.service.impl;
 
 
 import com.small.o2o.comp.core.constants.O2OConstants;
+import com.small.o2o.comp.core.exception.BussinessException;
 import com.small.o2o.comp.module.service.meta.JdbcTemplateService;
+import com.small.o2o.comp.module.vo.DSQueryPramsVO;
 import com.small.o2o.comp.module.vo.IndexExpressions;
 import com.small.o2o.comp.module.vo.ObObjectInfoVO;
 import com.small.o2o.comp.module.vo.ObProcedureVO;
@@ -17,6 +19,7 @@ import com.small.o2o.comp.module.vo.ObTypesVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -24,7 +27,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ObMetaDataService implements MetaDataService {
+public class ObOracleMetaDataService implements MetaDbTypeSQLService {
 
     @Autowired
     private JdbcTemplateService jdbcTemplateService ;
@@ -36,7 +39,43 @@ public class ObMetaDataService implements MetaDataService {
     }
 
     @Override
-    public <T> List<T> getObjectList(String sql ,Class clazz) {
+    public <T> List<T> getObjectList(DSQueryPramsVO pramsVO ,Class clazz) {
+        Assert.hasText(pramsVO.getQueryType(),"OB_ORACLE请求参数pramsVO缺少查询元数据类型queryType赋值!");
+        String sql = "";
+        switch (pramsVO.getQueryType()) {
+            case O2OConstants.SQL_OBJECT :
+                sql = queryObjectInfoSQL();
+                break;
+            case O2OConstants.SQL_TABLE:
+                sql = queryTableInfoSQL(pramsVO.getTableName());
+                break;
+            case O2OConstants.SQL_TABLE_COLUMN:
+                sql = queryTableColumnFullVoSQL(pramsVO.getTableName());
+                break;
+            case O2OConstants.SQL_TABLE_INDEX:
+                sql = queryTableIndexVoSQL(pramsVO.getTableName());
+                break;
+            case O2OConstants.SQL_TABLE_PRIMARYKEY:
+                sql = queryTablePrimaryKeyVoSQL(pramsVO.getTableName());
+                break;
+            case O2OConstants.SQL_VIEW :
+                sql = queryTableViewSQL();
+                break;
+            case O2OConstants.SQL_SEQUENCES:
+                sql = querySequencesVoSQL();
+                break;
+            case O2OConstants.SQL_TYPE:
+                sql = queryTypesVoSQL(pramsVO.getMetaType());
+                break;
+            case O2OConstants.SQL_FUNCTION:
+            case O2OConstants.SQL_PROCEDURE:
+            case O2OConstants.SQL_PACKAGE:
+                sql = queryProcedureVoSQL(pramsVO.getMetaType());
+                break;
+            default:
+                throw new BussinessException("不支持的元数据枚举查询");
+        }
+        System.out.println("OB_ORACLE "+pramsVO.getQueryType()+" >>> SQL \n " + sql);
         return jdbcTemplateService.queryForList(sql, clazz);
      }
 
@@ -56,7 +95,7 @@ public class ObMetaDataService implements MetaDataService {
     }
 
     @Override
-    public String queryTableColumnFullVoSql(String tableName) {
+    public String queryTableColumnFullVoSQL(String tableName) {
         String sql = "SELECT  TC.TABLE_NAME,  TC.COLUMN_NAME,\n" +
                 "       CASE  WHEN TC.DATA_TYPE='DATE' THEN  TC.DATA_TYPE\n" +
                 "            WHEN TC.DATA_TYPE='NUMBER' THEN  " +
@@ -84,32 +123,68 @@ public class ObMetaDataService implements MetaDataService {
 
     @Override
     public String queryTableIndexVoSQL(String tableName) {
-        return null;
+        String sql = "SELECT T.TABLE_NAME,T.INDEX_NAME,\n" +
+                "LISTAGG(CASE I.INDEX_TYPE WHEN 'NORMAL' THEN T.COLUMN_NAME ||' ' || T.DESCEND\n" +
+                "    ELSE T.COLUMN_NAME END , ',')WITHIN GROUP(ORDER BY T.TABLE_NAME, T.COLUMN_NAME) AS COLUMN_NAME\n" +
+                "       ,I.INDEX_TYPE, I.UNIQUENESS\n" +
+                "FROM USER_IND_COLUMNS T,USER_INDEXES I WHERE T.INDEX_NAME = I.INDEX_NAME AND T.TABLE_NAME = I.TABLE_NAME\n"  ;
+        if (StringUtils.hasText(tableName)){
+            sql += " AND I.TABLE_NAME = '"+tableName+"'" ;
+        }
+        sql += " GROUP BY  T.TABLE_NAME,T.INDEX_NAME ,I.INDEX_TYPE, I.UNIQUENESS ORDER BY T.TABLE_NAME,T.INDEX_NAME " ;
+
+        return sql;
     }
 
     @Override
     public String queryTablePrimaryKeyVoSQL(String tableName) {
-        return null;
+        String sql = "select cu.TABLE_NAME ,cu.CONSTRAINT_NAME ,LISTAGG(cu.COLUMN_NAME, ',')WITHIN GROUP(ORDER BY cu.TABLE_NAME,cu.COLUMN_NAME) as COLUMN_NAME " +
+                "from user_cons_columns cu, user_constraints au where cu.constraint_name = au.constraint_name and au.constraint_type = 'P' " ;
+
+        if (StringUtils.hasText(tableName)){
+            sql += " AND cu.TABLE_NAME = '"+tableName+"'" ;
+        }
+        sql += " GROUP BY  cu.TABLE_NAME,cu.CONSTRAINT_NAME ORDER BY cu.TABLE_NAME, cu.CONSTRAINT_NAME " ;
+        return sql;
     }
 
     @Override
     public String queryTableViewSQL() {
-        return null;
+        return "SELECT VIEW_NAME, TEXT_LENGTH, TEXT FROM USER_VIEWS " ;
     }
 
     @Override
     public String querySequencesVoSQL() {
-        return null;
+        return "SELECT T.SEQUENCE_NAME, T.LAST_NUMBER  FROM USER_SEQUENCES T ORDER BY T.SEQUENCE_NAME " ;
     }
 
     @Override
     public String queryTypesVoSQL(String metaType) {
-        return null;
+        String sql = "SELECT TYPE_NAME, TYPECODE FROM USER_TYPES " ;
+        if (StringUtils.hasText(metaType)){
+            sql = sql.concat("WHERE TYPECODE = '").concat(metaType.toUpperCase()).concat("' ");
+        }
+        return sql;
     }
 
     @Override
     public String queryProcedureVoSQL(String metaType) {
-        return null;
+        String sql = "SELECT OBJECT_TYPE, OBJECT_NAME, PROCEDURE_NAME FROM user_procedures  " ;
+        if (StringUtils.hasText(metaType)){
+            sql = sql.concat("WHERE OBJECT_TYPE = '").concat(metaType.toUpperCase()).concat("' ");
+        }
+        sql = sql.concat("order by OBJECT_TYPE, OBJECT_NAME, SUBPROGRAM_ID");
+        return sql;
+    }
+
+    @Override
+    public String queryPkgProcedureNameListSQL(String metaType) {
+        String sql = "SELECT distinct OBJECT_TYPE, OBJECT_NAME FROM user_procedures  " ;
+        if (StringUtils.hasText(metaType)){
+            sql = sql.concat("WHERE OBJECT_TYPE = '").concat(metaType.toUpperCase()).concat("' ");
+        }
+        sql = sql.concat("order by OBJECT_TYPE, OBJECT_NAME");
+        return sql;
     }
 
     @Override
@@ -335,71 +410,6 @@ public class ObMetaDataService implements MetaDataService {
         String sql = "SELECT COUNT(1) FROM  "+tableName;
         return jdbcTemplateService.queryOneColumn(sql, Long.class);
     }
-
-    /**
-     * 刪除所有的存过包、函数、存过
-     */
-    public void deleteProcedures(String type){
-        List<ObProcedureVO> obProcedureVOS = this.queryDistinctProcedureVO(type);
-        log.info("即将删除所有的存过包、函数、存过，合计元数据对象{}", obProcedureVOS.size());
-        for (ObProcedureVO procedure:  obProcedureVOS) {
-            jdbcTemplateService.execute("DROP ".concat(procedure.getObjectType()).concat(" ").concat(procedure.getObjectName()));
-        }
-        log.info("删除 "+type+"完成！");
-    }
-
-    /**
-     * 删除操作要去重
-     * @param type
-     * @return
-     */
-    private List<ObProcedureVO> queryDistinctProcedureVO(String type) {
-        String sql = "SELECT DISTINCT OBJECT_TYPE, OBJECT_NAME  FROM user_procedures  " ;
-        if (StringUtils.hasText(type)){
-            sql = sql.concat("WHERE OBJECT_TYPE = '").concat(type.toUpperCase()).concat("' ");
-        }
-        sql = sql.concat("order by OBJECT_TYPE, OBJECT_NAME");
-        return jdbcTemplateService.queryForList(sql, ObProcedureVO.class);
-
-    }
-
-    /**
-     * 刪除所有序列
-     */
-    public void deleteAllSequences(){
-        List<ObSequencesVO> sequencesVOList = this.querySequencesVO();
-        log.info("即将刪除所有序列，合计元数据对象{}", sequencesVOList.size());
-        for (ObSequencesVO sequencesVO:  sequencesVOList) {
-            jdbcTemplateService.execute("DROP SEQUENCE "+sequencesVO.getSequenceName());
-        }
-        log.info("删除序列完成！");
-    }
-
-    /**
-     * 刪除所有表索引
-     */
-    public void deleteAllIndex(){
-        List<ObTableIndexVO> indexList = this.queryTableIndexVO("");
-        log.info("即将刪除所有表索引，合计元数据对象{}", indexList.size());
-        for (ObTableIndexVO indexVO:  indexList) {
-            jdbcTemplateService.execute("DROP INDEX "+indexVO.getIndexName());
-        }
-        log.info("删除所有表索引完成！");
-    }
-
-    /**
-     * 刪除所有表索引
-     */
-    public void deleteAllTables(String tableType){
-        List<ObTableInfoVO> tableInfoList = this.queryTableInfo(tableType);
-        log.info("即将刪除所有表，合计元数据对象{}", tableInfoList.size());
-        for (ObTableInfoVO tableInfoVO:  tableInfoList) {
-            jdbcTemplateService.execute("DROP ".concat(tableInfoVO.getTableType()).concat(" ").concat(tableInfoVO.getTableName()));
-        }
-        log.info("删除所有表完成！");
-    }
-
-
 
 
 }

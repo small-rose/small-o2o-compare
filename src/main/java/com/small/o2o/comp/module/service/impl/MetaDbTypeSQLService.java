@@ -1,5 +1,7 @@
 package com.small.o2o.comp.module.service.impl;
 
+import com.small.o2o.comp.config.annotation.DynamicDataSource;
+import com.small.o2o.comp.module.vo.DSQueryPramsVO;
 import com.small.o2o.comp.module.vo.IndexExpressions;
 import com.small.o2o.comp.module.vo.ObObjectInfoVO;
 import com.small.o2o.comp.module.vo.ObProcedureVO;
@@ -14,21 +16,25 @@ import com.small.o2o.comp.module.vo.ObTypesVO;
 
 import java.util.List;
 
-public interface MetaDataService {
+public interface MetaDbTypeSQLService {
 
-
+    /**
+     * 获取实现类支持的数据库类型  O2OConstants.DBType
+     * @return
+     */
     public String getDbType();
 
 
     /**
      *
      * 查基本的对象信息
-     * @param sql
+     * @param pramsVO
      * @param clazz
      * @param <T>
      * @return
      */
-    public <T> List<T> getObjectList(String sql ,Class clazz);
+    @DynamicDataSource
+    public <T> List<T> getObjectList(DSQueryPramsVO pramsVO, Class clazz);
 
     /**
      * 查基本的对象信息
@@ -38,7 +44,7 @@ public interface MetaDataService {
 
     String queryTableInfoSQL(String tableName);
 
-    String queryTableColumnFullVoSql(String tableName);
+    String queryTableColumnFullVoSQL(String tableName);
 
     String queryTableIndexVoSQL(String tableName);
 
@@ -50,8 +56,9 @@ public interface MetaDataService {
 
     String queryTypesVoSQL(String metaType);
 
-    String queryProcedureVoSQL(String metaType);
+    public String queryProcedureVoSQL(String metaType);
 
+    public String queryPkgProcedureNameListSQL(String metaType);
     /**
      * 查基本的对象信息
      * @return

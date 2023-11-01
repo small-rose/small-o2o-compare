@@ -1,8 +1,9 @@
 package com.small.o2o.comp.module.facade;
 
 
+import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
-import com.small.o2o.comp.module.service.meta.QueryMetaService;
+import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
 import com.small.o2o.comp.module.vo.DSCompareVO;
 import com.small.o2o.comp.module.vo.DSQueryPramsVO;
 import com.small.o2o.comp.module.vo.ObTableInfoVO;
@@ -18,7 +19,7 @@ import java.util.List;
  public class DiffTableColumnService {
 
     @Autowired
-    private QueryMetaService queryMetaService;
+    private QueryMetaDataService queryMetaService;
     @Autowired
     private CompareMetaDataService compareMetaDataService;
     /**
@@ -34,11 +35,12 @@ import java.util.List;
         List<String> oraNames = new ArrayList<>();
         DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).tableName(dscVO.getTable()).build();
 
-        List<ObTableInfoVO> obObjList = queryMetaService.queryTableInfo(queryPramsVO);
+
+        List<ObTableInfoVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
 
         DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).tableName(dscVO.getTable()).build();
 
-        List<ObTableInfoVO> oraObjList = queryMetaService.queryTableInfo(queryPramsVO2);
+        List<ObTableInfoVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObTableInfoVO.class);
 
         obObjList.stream().forEach(p->obNames.add(p.getTableName()));
         oraObjList.stream().forEach(p->oraNames.add(p.getTableName()));

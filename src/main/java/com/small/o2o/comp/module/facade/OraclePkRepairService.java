@@ -5,7 +5,7 @@ import com.alibaba.excel.metadata.Sheet;
 import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
 import com.small.o2o.comp.module.facade.base.CommonGenerater;
-import com.small.o2o.comp.module.service.impl.MetaDataService;
+import com.small.o2o.comp.module.service.impl.MetaDbTypeSQLService;
 import com.small.o2o.comp.module.vo.ORATablePrimaryKeyVO;
 import com.small.o2o.comp.module.vo.ObTablePrimaryKeyVO;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import java.util.List;
 
 
     @Autowired
-    private MetaDataService oracleMetaDataService;
+    private MetaDbTypeSQLService oracleMetaDataService;
     @Autowired
     private FilePickService filePickService;
 
@@ -33,7 +33,7 @@ import java.util.List;
 
     private List<MultipleSheelPropety>  getDatas() {
         ArrayList<MultipleSheelPropety> excelList = new ArrayList<>();
-        for (O2OConstants.SheetNameEnum sheetEnum : O2OConstants.SheetNameEnum.values()) {
+        for (O2OConstants.MetaBuzTypeEnum sheetEnum : O2OConstants.MetaBuzTypeEnum.values()) {
 
             if (12 == sheetEnum.getIndex()) {
                 log.info("开始查 " + sheetEnum.getCode());

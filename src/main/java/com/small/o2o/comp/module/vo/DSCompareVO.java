@@ -1,6 +1,9 @@
 package com.small.o2o.comp.module.vo;
 
+import com.small.o2o.comp.core.utils.PathUtils;
+import lombok.Builder;
 import lombok.Data;
+import org.springframework.util.StringUtils;
 
 /**
  * @description: TODO 功能角色说明：
@@ -10,10 +13,19 @@ import lombok.Data;
  * @version: v1.0
  */
 
+@Builder
 @Data
 public class DSCompareVO {
 
+    private static final String DEFAULT_PATH =  "";
+
+    /**
+     *  must
+     */
     private String dsFirst;
+    /**
+     *  must
+     */
     private String dsSecond ;
 
      private String table ;
@@ -26,6 +38,14 @@ public class DSCompareVO {
 
     private boolean tableColumnDDL ;
 
+    private String generateExcelPath ;
     private String ext1 ;
 
+
+    public String getGenerateExcelPath() {
+        if (!StringUtils.hasText(generateExcelPath)){
+            generateExcelPath = PathUtils.geJarPath();
+        }
+        return generateExcelPath;
+    }
 }

@@ -1,15 +1,22 @@
-package com.small.o2o.comp.module.service.metadata;
+package com.small.o2o.comp.module.service.oracle;
 
 
-import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
-import com.small.o2o.comp.module.service.meta.QueryMetaService;
+import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.module.facade.FilePickService;
-import com.small.o2o.comp.core.utils.FileRWUtils;
-import com.small.o2o.comp.module.vo.*;
+import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
+import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
+import com.small.o2o.comp.module.vo.DSCompareVO;
+import com.small.o2o.comp.module.vo.DSQueryPramsVO;
+import com.small.o2o.comp.module.vo.IndexExpressions;
+import com.small.o2o.comp.module.vo.ObTableIndexVO;
+import com.small.o2o.comp.module.vo.ObTableInfoVO;
+import com.small.o2o.comp.module.vo.OracleTableIndexVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,10 +29,22 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class TableIndexService {
+public class TableIndexService  implements BuzTypeService {
 
     @Autowired
-    private QueryMetaService queryMetaService;
+    private QueryMetaDataService queryMetaService;
+
+
+    @Override
+    public String getBuzType() {
+        return O2OConstants.MetaBuzTypeEnum.TABLE_INDEX.getCode();
+    }
+
+    @Override
+    public  List getCompareMetaList(DSQueryPramsVO queryPramsVO, Class clazz) {
+        return getTableIndexs(queryPramsVO.getTableName());
+    }
+
 
 
     private FilePickService filePickService;
@@ -45,34 +64,46 @@ public class TableIndexService {
 
         List<String> tableList = new ArrayList<>();
 
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).tableName(tabName).build();
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).tableName(tabName).build();
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
+        if (StringUtils.hasText(tabName)){
+            queryPramsVO.setTableName(tabName);
+            queryPramsVO2.setTableName(tabName);
+        }
         List<ObTableInfoVO> allTableList = MetaDataContextHolder.getAllTableList();
         if (CollectionUtils.isEmpty(allTableList)){
              List<String> tempList = new ArrayList<>();
             //重新查询
-
-            List<ObTableInfoVO> obObjList = queryMetaService.queryTableInfo(queryPramsVO);
-            obObjList.forEach(t-> tempList.add(t.getTableName()));
-
-            List<ObTableInfoVO> obObjList2 = queryMetaService.queryTableInfo(queryPramsVO2);;
-            obObjList2.forEach(t-> tempList.add(t.getTableName()));
-
-            tableList = tempList.stream().distinct().collect(Collectors.toList());
+            List<ObTableInfoVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
+            if (!ObjectUtils.isEmpty(obObjList)) {
+                obObjList.forEach(t -> tempList.add(t.getTableName()));
+            }
+            List<ObTableInfoVO> obObjList2 = queryMetaService.queryObjectList(queryPramsVO2, ObTableInfoVO.class);;
+            if (!ObjectUtils.isEmpty(obObjList)) {
+                obObjList2.forEach(t-> tempList.add(t.getTableName()));
+            }
+            tableList.addAll(tempList.stream().distinct().collect(Collectors.toList()));
 
         }else{
-             List<ObTableInfoVO> obObjList2 = queryMetaService.queryTableInfo(queryPramsVO);;
+             List<ObTableInfoVO> obObjList2 = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
             for (ObTableInfoVO tableInfoVO : obObjList2) {
                 tableList.add(tableInfoVO.getTableName());
             }
         }
+
+
         List<IndexExpressions> obieList = queryMetaService.queryTableIndexExpressions(queryPramsVO);
         List<IndexExpressions> oraieList = queryMetaService.queryTableIndexExpressions(queryPramsVO2);
-
-        Map<String, String> obFunIndexMap = obieList.stream().collect(
-                Collectors.toMap(IndexExpressions::getIndexName, IndexExpressions::getColumnExpression));
-        Map<String, String> oracleFunIndexMap = oraieList.stream().collect(
-                Collectors.toMap(IndexExpressions::getIndexName, IndexExpressions::getColumnExpression));
+        Map<String, String> obFunIndexMap = null;
+        Map<String, String> oracleFunIndexMap = null;
+        if (!ObjectUtils.isEmpty(obieList) ){
+            obFunIndexMap = obieList.stream().collect(
+                    Collectors.toMap(IndexExpressions::getIndexName, IndexExpressions::getColumnExpression));
+        }
+        if (!ObjectUtils.isEmpty(oraieList)){
+            oracleFunIndexMap = oraieList.stream().collect(
+                    Collectors.toMap(IndexExpressions::getIndexName, IndexExpressions::getColumnExpression));
+        }
 
         int i = 0 ;
         for (String tableName : tableList) {
@@ -84,7 +115,7 @@ public class TableIndexService {
 
             System.out.println(i+" Table "+tableName+"  ob indexs " +obObjList.size() +" oracle indexs " +oraObjList.size());
             i++;
-            if (obObjList.size()==0 && oraObjList.size()==0){
+            if (ObjectUtils.isEmpty(obObjList) && ObjectUtils.isEmpty(oraObjList)){
                 continue;
             }
             List<String> allIndexs = new ArrayList<>();
@@ -178,8 +209,18 @@ public class TableIndexService {
             allIndexs.clear();
         }
 
-        String path = "E:\\obgenerator\\ORA_DDL_INDEX.SQL";
-        FileRWUtils.fileWriter(path, ddlList);
+        if (!ObjectUtils.isEmpty(ddlList)){
+            System.out.println("生成修复索引DDL建议");
+            ddlList.forEach(System.out::println);
+        }
+        if (ObjectUtils.isEmpty(tableList)) {
+            OracleTableIndexVO indexVO = new OracleTableIndexVO();
+            indexVO.setTableName("未发现表");
+            indexVO.setTableName2("未发现表");
+            resultList.add(indexVO);
+        }
+        //String path = "E:\\obgenerator\\ORA_DDL_INDEX.SQL";
+        //FileRWUtils.fileWriter(path, ddlList);
         return resultList;
     }
 

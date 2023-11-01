@@ -5,7 +5,7 @@ import com.alibaba.excel.metadata.Sheet;
 import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
 import com.small.o2o.comp.module.facade.base.CommonGenerater;
-import com.small.o2o.comp.module.service.metadata.ProcedureListService;
+import com.small.o2o.comp.module.service.oracle.ProcedureListService;
 import com.small.o2o.comp.module.vo.OracleProcedureVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ import java.util.List;
 
     private List<MultipleSheelPropety>  getDatas() {
         ArrayList<MultipleSheelPropety> excelList = new ArrayList<>();
-        for (O2OConstants.SheetNameEnum sheetEnum : O2OConstants.SheetNameEnum.values()) {
+        for (O2OConstants.MetaBuzTypeEnum sheetEnum : O2OConstants.MetaBuzTypeEnum.values()) {
 
              if (9 == sheetEnum.getIndex() || 7 == sheetEnum.getIndex() || 8 == sheetEnum.getIndex()) {
                 log.info("开始查 " + sheetEnum.getCode());
@@ -56,7 +56,7 @@ import java.util.List;
     private List<MultipleSheelPropety> getDatas2() {
         ArrayList<MultipleSheelPropety> excelList = new ArrayList<>();
 
-        for (O2OConstants.SheetNameEnum sheetEnum : O2OConstants.SheetNameEnum.values()) {
+        for (O2OConstants.MetaBuzTypeEnum sheetEnum : O2OConstants.MetaBuzTypeEnum.values()) {
 
             if (13 == sheetEnum.getIndex() ) {
                 log.info("开始查 " + sheetEnum.getCode());

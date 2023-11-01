@@ -1,7 +1,6 @@
 package com.small.o2o.comp.module.facade;
 
 
-import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.metadata.Sheet;
@@ -9,17 +8,33 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.core.excel.CheckCellHandler;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
-import com.small.o2o.comp.core.exception.DataCheckException;
 import com.small.o2o.comp.module.facade.base.MetaDataCompare;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
-import com.small.o2o.comp.module.service.metadata.*;
-import com.small.o2o.comp.module.vo.*;
+import com.small.o2o.comp.module.service.oracle.ObjectInfoService;
+import com.small.o2o.comp.module.service.oracle.ProcedureListService;
+import com.small.o2o.comp.module.service.oracle.SequencesService;
+import com.small.o2o.comp.module.service.oracle.TableColumnService;
+import com.small.o2o.comp.module.service.oracle.TableIndexService;
+import com.small.o2o.comp.module.service.oracle.TableListService;
+import com.small.o2o.comp.module.service.oracle.TablePrimaryKeyService;
+import com.small.o2o.comp.module.service.oracle.TypeListService;
+import com.small.o2o.comp.module.vo.DSCompareVO;
+import com.small.o2o.comp.module.vo.OracleObjectInfoVO;
+import com.small.o2o.comp.module.vo.OracleProcedureVO;
+import com.small.o2o.comp.module.vo.OracleSequencesVO;
+import com.small.o2o.comp.module.vo.OracleTableColumnFullVO;
+import com.small.o2o.comp.module.vo.OracleTableIndexVO;
+import com.small.o2o.comp.module.vo.OracleTableInfoVO;
+import com.small.o2o.comp.module.vo.OracleTablePrimaryKeyVO;
+import com.small.o2o.comp.module.vo.OracleTableViewVO;
+import com.small.o2o.comp.module.vo.OracleTypesVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -48,16 +63,16 @@ public class CompareMetaDataService extends MetaDataCompare {
     @Override
     protected boolean check() {
         DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
-        if (!ObjectUtil.isNotNull(dscVO) || !StringUtils.hasText(dscVO.getDsFirst()) || !StringUtils.hasText(dscVO.getDsSecond())){
-            throw new DataCheckException("未发现需要比较的数据源！");
-        }
+        Assert.notNull(dscVO, "请初始化比较参数DSCompareVO实例。");
+        Assert.hasText(dscVO.getDsFirst(), "请设定比较的数据源名称dsFirst。");
+        Assert.hasText(dscVO.getDsSecond(), "请设定比较的数据源名称dsSecond。");
         return true ;
     }
 
     @Override
     protected List<MultipleSheelPropety> queryData() {
         ArrayList<MultipleSheelPropety> excelList = new ArrayList<>();
-        for (O2OConstants.SheetNameEnum sheetEnum : O2OConstants.SheetNameEnum.values()) {
+        for (O2OConstants.MetaBuzTypeEnum sheetEnum : O2OConstants.MetaBuzTypeEnum.values()) {
 
             if (0 == sheetEnum.getIndex()) {
                 log.info("开始查0 " + sheetEnum.getDesc());
@@ -160,7 +175,7 @@ public class CompareMetaDataService extends MetaDataCompare {
         log.info("开始生成Excel ...");
         if (!filePath.endsWith(".xlsx")) {
             String fileName = "元数据收集".concat(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmm"))).concat(".xlsx");
-            filePath = filePath + fileName;
+            filePath = filePath.endsWith(File.separator)? filePath : filePath.concat(File.separator) + fileName;
         }
         ExcelWriter excelWriter = null;
         try {

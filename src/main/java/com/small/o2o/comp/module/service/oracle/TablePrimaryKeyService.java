@@ -1,14 +1,19 @@
-package com.small.o2o.comp.module.service.metadata;
+package com.small.o2o.comp.module.service.oracle;
 
 
+import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
-import com.small.o2o.comp.module.service.meta.QueryMetaService;
-import com.small.o2o.comp.core.utils.FileRWUtils;
-import com.small.o2o.comp.module.vo.*;
+import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
+import com.small.o2o.comp.module.vo.DSCompareVO;
+import com.small.o2o.comp.module.vo.DSQueryPramsVO;
+import com.small.o2o.comp.module.vo.ObTableInfoVO;
+import com.small.o2o.comp.module.vo.ObTablePrimaryKeyVO;
+import com.small.o2o.comp.module.vo.OracleTablePrimaryKeyVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +26,21 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class TablePrimaryKeyService {
+public class TablePrimaryKeyService  implements BuzTypeService {
 
 
     @Autowired
-    private QueryMetaService queryMetaService;
+    private QueryMetaDataService queryMetaService;
 
+    @Override
+    public String getBuzType() {
+        return O2OConstants.MetaBuzTypeEnum.TABLE_PRIMARYKEY.getCode();
+    }
 
+    @Override
+    public  List getCompareMetaList(DSQueryPramsVO queryPramsVO, Class clazz) {
+        return getTablePrimaryKey(queryPramsVO.getTableName());
+    }
 
     String DROP_DDL = "ALTER TABLE %s DROP CONSTRAINT %S;";
     String ADD_DDL = "ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY( %s );";
@@ -52,18 +65,22 @@ public class TablePrimaryKeyService {
         if (CollectionUtils.isEmpty(allTableList)){
             List<String> tempList = new ArrayList<>();
             //重新查询
-            List<ObTableInfoVO> obObjList = queryMetaService.queryTableInfo(queryPramsVO);
-            obObjList.forEach(t-> tempList.add(t.getTableName()));
-
-            List<ObTableInfoVO> obObjList2 = queryMetaService.queryTableInfo(queryPramsVO2);;
-            obObjList2.forEach(t-> tempList.add(t.getTableName()));
-
+            List<ObTableInfoVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
+            if (!ObjectUtils.isEmpty(obObjList)) {
+                obObjList.forEach(t -> tempList.add(t.getTableName()));
+            }
+            List<ObTableInfoVO> obObjList2 = queryMetaService.queryObjectList(queryPramsVO2, ObTableInfoVO.class);
+            if (!ObjectUtils.isEmpty(obObjList2)) {
+                obObjList2.forEach(t -> tempList.add(t.getTableName()));
+            }
             tableList = tempList.stream().distinct().collect(Collectors.toList());
 
         }else{
-            List<ObTableInfoVO> obObjList2 = queryMetaService.queryTableInfo(queryPramsVO);;
-            for (ObTableInfoVO tableInfoVO : obObjList2) {
-                tableList.add(tableInfoVO.getTableName());
+            List<ObTableInfoVO> obObjList2 = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
+            if (!ObjectUtils.isEmpty(obObjList2)) {
+                for (ObTableInfoVO tableInfoVO : obObjList2) {
+                    tableList.add(tableInfoVO.getTableName());
+                }
             }
         }
 
@@ -71,12 +88,12 @@ public class TablePrimaryKeyService {
         for (String tableName : tableList) {
 
             queryPramsVO.setTableName(tableName);
-            List<ObTablePrimaryKeyVO> obObjList = queryMetaService.queryTablePrimaryKeyVO(queryPramsVO);
+            List<ObTablePrimaryKeyVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTablePrimaryKeyVO.class);
             queryPramsVO2.setTableName(tableName);
-            List<ObTablePrimaryKeyVO> oraObjList = queryMetaService.queryTablePrimaryKeyVO(queryPramsVO2);
+            List<ObTablePrimaryKeyVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObTablePrimaryKeyVO.class);
             System.out.println(i+" Table primary key  "+tableName+"  ob primarykey " +obObjList.size() +" oracle primarykey " +oraObjList.size());
             i++;
-            if (obObjList.size()==0 && oraObjList.size()==0){
+            if (ObjectUtils.isEmpty(obObjList) && ObjectUtils.isEmpty(oraObjList) ){
                 continue;
             }
             List<String> allIndexs = new ArrayList<>();
@@ -153,8 +170,8 @@ public class TablePrimaryKeyService {
             allIndexs.clear();
         }
 
-        String path = "E:\\obgenerator\\ORA_DDL_PRIMARY_KEY.SQL";
-        FileRWUtils.fileWriter(path, ddlList);
+        //String path = "E:\\obgenerator\\ORA_DDL_PRIMARY_KEY.SQL";
+        //FileRWUtils.fileWriter(path, ddlList);
         return resultList;
     }
 

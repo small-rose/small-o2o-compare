@@ -29,20 +29,17 @@ public class DataSourceAop {
     }
 
     @Around(value = "servicePoint() ")
-    public void arroundService(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object arroundService(ProceedingJoinPoint joinPoint) throws Throwable {
         try {
             Object[] args = joinPoint.getArgs();
             DSQueryPramsVO queryPramsVO = (DSQueryPramsVO) args[0];
             DynamicDSContextHolder.setDataSourceType(queryPramsVO.getDataSourceName());
-            log.info("执行到了切面了......");
-            joinPoint.proceed();
         }catch (Exception e){
-
+            e.printStackTrace();
         }finally {
             DynamicDSContextHolder.removeDataSourceType();
         }
-
-
+        return joinPoint.proceed();
     }
 
 }

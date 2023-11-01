@@ -33,7 +33,7 @@ public class JdbcTemplateService {
 
     public void execute(String sql){
         if (log.isDebugEnabled()){
-            log.debug("EXECUTE OceanBase SQL - \n------------------------\n{}\n------------------------",sql);
+            log.debug("EXECUTE OceanBase SQL : \n{}\n------------------------",sql);
 
         }
         jdbcTemplate.execute(sql);

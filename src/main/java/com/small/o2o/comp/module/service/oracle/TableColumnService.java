@@ -1,14 +1,20 @@
-package com.small.o2o.comp.module.service.metadata;
+package com.small.o2o.comp.module.service.oracle;
 
 
 import cn.hutool.core.util.StrUtil;
+import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
-import com.small.o2o.comp.module.service.meta.QueryMetaService;
-import com.small.o2o.comp.module.vo.*;
+import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
+import com.small.o2o.comp.module.vo.DSCompareVO;
+import com.small.o2o.comp.module.vo.DSQueryPramsVO;
+import com.small.o2o.comp.module.vo.ObTableColumnFullVO;
+import com.small.o2o.comp.module.vo.ObTableInfoVO;
+import com.small.o2o.comp.module.vo.OracleTableColumnFullVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -22,11 +28,22 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class TableColumnService {
+public class TableColumnService  implements BuzTypeService {
 
 
     @Autowired
-    private QueryMetaService queryMetaService;
+    private QueryMetaDataService queryMetaService;
+
+    @Override
+    public String getBuzType() {
+        return O2OConstants.MetaBuzTypeEnum.TableColumnVO.getCode();
+    }
+
+    @Override
+    public  List getCompareMetaList(DSQueryPramsVO queryPramsVO, Class clazz) {
+        return getTableColumnFulls();
+    }
+
 
     /**
      * 表的列对比
@@ -37,24 +54,33 @@ public class TableColumnService {
         List<String> tableList = new ArrayList<>();
         DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
         List<ObTableInfoVO> allTableList = MetaDataContextHolder.getAllTableList();
+
+        //重新查询
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType())
+                .dataSourceName(dscVO.getDsFirst()).tableName(dscVO.getTable()).build();
+
+        //重新查询
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType())
+                .dataSourceName(dscVO.getDsSecond()).tableName(dscVO.getTable()).build();
         if (CollectionUtils.isEmpty(allTableList)){
             List<String> tempList = new ArrayList<>();
-            //重新查询
-            DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).tableName(dscVO.getTable()).build();
-            List<ObTableInfoVO> obObjList = queryMetaService.queryTableInfo(queryPramsVO);
-            obObjList.forEach(t-> tempList.add(t.getTableName()));
 
-            DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).tableName(dscVO.getTable()).build();
-            List<ObTableInfoVO> obObjList2 = queryMetaService.queryTableInfo(queryPramsVO2);;
-            obObjList2.forEach(t-> tempList.add(t.getTableName()));
+            List<ObTableInfoVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
+            if (!ObjectUtils.isEmpty(obObjList)) {
+                obObjList.forEach(t -> tempList.add(t.getTableName()));
+            }
+
+
+            List<ObTableInfoVO> obObjList2 = queryMetaService.queryObjectList(queryPramsVO2, ObTableInfoVO.class);;
+            if (!ObjectUtils.isEmpty(obObjList2)) {
+                obObjList2.forEach(t -> tempList.add(t.getTableName()));
+            }
 
             tableList = tempList.stream().distinct().collect(Collectors.toList());
 
-        }else{
+        } else {
 
-            DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).tableName(dscVO.getTable()).build();
-            List<ObTableInfoVO> obObjList2 = queryMetaService.queryTableInfo(queryPramsVO);;
-            for (ObTableInfoVO tableInfoVO : obObjList2) {
+            for (ObTableInfoVO tableInfoVO : allTableList) {
                 tableList.add(tableInfoVO.getTableName());
             }
         }
@@ -65,14 +91,11 @@ public class TableColumnService {
         int tableNo = 1;
         OracleTableColumnFullVO object = null;
 
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).build();
-
         for (String tableName : tableList) {
             queryPramsVO.setTableName(tableName);
-            List<ObTableColumnFullVO> obObjList = queryMetaService.queryTableColumnFullVO(queryPramsVO);
+            List<ObTableColumnFullVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableColumnFullVO.class);
             queryPramsVO.setTableName(tableName);
-            List<ObTableColumnFullVO> oraObjList = queryMetaService.queryTableColumnFullVO(queryPramsVO2);
+            List<ObTableColumnFullVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObTableColumnFullVO.class);
 
             Map<String, ObTableColumnFullVO> obObjMap = obObjList.stream().collect(
                     Collectors.toMap(o -> o.getTableName().concat(o.getColumnName()), (p) -> p));

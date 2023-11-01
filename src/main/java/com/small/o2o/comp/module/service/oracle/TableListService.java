@@ -1,12 +1,20 @@
-package com.small.o2o.comp.module.service.metadata;
+package com.small.o2o.comp.module.service.oracle;
 
 
+import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
-import com.small.o2o.comp.module.service.meta.QueryMetaService;
-import com.small.o2o.comp.module.vo.*;
+import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
+import com.small.o2o.comp.module.vo.DSCompareVO;
+import com.small.o2o.comp.module.vo.DSQueryPramsVO;
+import com.small.o2o.comp.module.vo.ObTableInfoVO;
+import com.small.o2o.comp.module.vo.ObTablePartitionVO;
+import com.small.o2o.comp.module.vo.ObTableViewVO;
+import com.small.o2o.comp.module.vo.OracleTableInfoVO;
+import com.small.o2o.comp.module.vo.OracleTableViewVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,11 +28,20 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class TableListService {
+public class TableListService  implements BuzTypeService {
 
     @Autowired
-    private QueryMetaService queryMetaService;
+    private QueryMetaDataService queryMetaService;
 
+    @Override
+    public String getBuzType() {
+        return O2OConstants.MetaBuzTypeEnum.TABLE_INFO.getCode();
+    }
+
+    @Override
+    public  List getCompareMetaList(DSQueryPramsVO queryPramsVO, Class clazz) {
+        return getTableInfo();
+    }
 
     /**
      * 表-视图 对比
@@ -34,50 +51,69 @@ public class TableListService {
     public List<OracleTableInfoVO> getTableInfo( ) {
         DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
 
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).build();
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
 
-        List<ObTableInfoVO> obObjList = queryMetaService.queryTableInfo(queryPramsVO);
-        List<ObTableInfoVO> oraObjList = queryMetaService.queryTableInfo(queryPramsVO2);
+        List<ObTableInfoVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
+        List<ObTableInfoVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObTableInfoVO.class);
 
-        Map<String, ObTableInfoVO> obObjMap = obObjList.stream().collect(
-                Collectors.toMap(o -> o.getTableName(), (p) -> p));
-
-        Map<String, ObTableInfoVO> oracleObjMap = oraObjList.stream().collect(
-                Collectors.toMap(o -> o.getTableName(), Function.identity()));
-
+        Map<String, ObTableInfoVO> obObjMap = null;
+        if (!ObjectUtils.isEmpty(obObjList)) {
+            obObjMap = obObjList.stream().collect(
+                    Collectors.toMap(o -> o.getTableName(), (p) -> p));
+        }
+        Map<String, ObTableInfoVO> oracleObjMap = null;
+        if (!ObjectUtils.isEmpty(oraObjList)) {
+            oracleObjMap = oraObjList.stream().collect(
+                    Collectors.toMap(o -> o.getTableName(), Function.identity()));
+        }
         //OB 查分区数
         List<ObTablePartitionVO> obTablePartitionList = queryMetaService.queryTablePartitionVO(queryPramsVO);
-        Map<String, Long> obPartMap = obTablePartitionList.stream().collect(Collectors.toMap(ObTablePartitionVO::getTableName, ObTablePartitionVO::getCount));
+        Map<String, Long> obPartMap = null;
+        if (!ObjectUtils.isEmpty(obTablePartitionList)) {
+            obPartMap = obTablePartitionList.stream().collect(Collectors.toMap(ObTablePartitionVO::getTableName, ObTablePartitionVO::getCount));
+        }
         //OB 查记录数
         List<ObTablePartitionVO> obRecordList = queryMetaService.queryTableReCords(queryPramsVO);
-        Map<String, Long> obRecordMap = obRecordList.stream().collect(Collectors.toMap(ObTablePartitionVO::getTableName, ObTablePartitionVO::getCount));
-
+        Map<String, Long> obRecordMap = null;
+        if (!ObjectUtils.isEmpty(obRecordList)) {
+            obRecordMap = obRecordList.stream().collect(Collectors.toMap(ObTablePartitionVO::getTableName, ObTablePartitionVO::getCount));
+        }
 
         //ORACLE 查分区数
         List<ObTablePartitionVO> oraTablePartitionList = queryMetaService.queryTablePartitionVO(queryPramsVO2);
-        Map<String, Long> oraPartMap = oraTablePartitionList.stream().collect(Collectors.toMap(ObTablePartitionVO::getTableName, ObTablePartitionVO::getCount));
+        Map<String, Long> oraPartMap = null ;
+        if (!ObjectUtils.isEmpty(oraTablePartitionList)) {
+            oraPartMap = oraTablePartitionList.stream().collect(Collectors.toMap(ObTablePartitionVO::getTableName, ObTablePartitionVO::getCount));
+        }
         //ORACLE 查记录数
         List<ObTablePartitionVO> oraRecordList = queryMetaService.queryTableReCords(queryPramsVO2);
         //Map<String, Long> oraRecordMap = oraRecordList.stream().collect(Collectors.toMap(ObTablePartitionVO::getTableName, ObTablePartitionVO::getCount));
         Map<String, Long> oraRecordMap = new HashMap<>();
-        for (ObTablePartitionVO obTablePartitionVO : oraRecordList) {
-            oraRecordMap.put(obTablePartitionVO.getTableName(), obTablePartitionVO.getCount());
+        if (!ObjectUtils.isEmpty(oraTablePartitionList)) {
+            oraRecordMap = oraRecordList.stream().collect(Collectors.toMap(ObTablePartitionVO::getTableName, ObTablePartitionVO::getCount));
         }
-
         List<String> allTables = new ArrayList<>();
-        for (ObTableInfoVO obTableInfoVO : obObjList) {
-            allTables.add(obTableInfoVO.getTableName());
-
-        }
-        for (ObTableInfoVO obTableInfoVO : oraObjList) {
-            if (!allTables.contains(obTableInfoVO.getTableName())) {
+        if (!ObjectUtils.isEmpty(obObjList)) {
+            for (ObTableInfoVO obTableInfoVO : obObjList) {
                 allTables.add(obTableInfoVO.getTableName());
+
+            }
+        }
+        if (!ObjectUtils.isEmpty(oraObjList)) {
+            for (ObTableInfoVO obTableInfoVO : oraObjList) {
+                if (!allTables.contains(obTableInfoVO.getTableName())) {
+                    allTables.add(obTableInfoVO.getTableName());
+                }
             }
         }
         List<ObTableInfoVO> cache = new ArrayList<>();
-        cache.addAll(obObjList);
-        cache.addAll(oraObjList);
+        if (!ObjectUtils.isEmpty(obObjList)) {
+            cache.addAll(obObjList);
+        }
+        if (!ObjectUtils.isEmpty(oraObjList)) {
+            cache.addAll(oraObjList);
+        }
         MetaDataContextHolder.setAllTableList(cache);
 
         List<OracleTableInfoVO> resultList = new ArrayList<>();
@@ -133,25 +169,33 @@ public class TableListService {
         DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
         DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).build();
 
-        List<ObTableViewVO> obObjList = queryMetaService.queryTableView(queryPramsVO);
-        List<ObTableViewVO> oraObjList = queryMetaService.queryTableView(queryPramsVO2);
+        List<ObTableViewVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableViewVO.class);
+        List<ObTableViewVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObTableViewVO.class);
 
-        Map<String, ObTableViewVO> obObjMap = obObjList.stream().collect(
-                Collectors.toMap(o -> o.getViewName(), (p) -> p));
-
-        Map<String, ObTableViewVO> oracleObjMap = oraObjList.stream().collect(
-                Collectors.toMap(o -> o.getViewName(), Function.identity()));
-
+        Map<String, ObTableViewVO> obObjMap = null;
+        Map<String, ObTableViewVO> oracleObjMap = null;
+        if (!ObjectUtils.isEmpty(obObjList)) {
+            obObjMap = obObjList.stream().collect(
+                    Collectors.toMap(o -> o.getViewName(), (p) -> p));
+        }
+        if (!ObjectUtils.isEmpty(oraObjList)) {
+            oracleObjMap = oraObjList.stream().collect(
+                    Collectors.toMap(o -> o.getViewName(), Function.identity()));
+        }
 
 
         List<String> allTables = new ArrayList<>();
-        for (ObTableViewVO obTableInfoVO : obObjList) {
-            allTables.add(obTableInfoVO.getViewName());
-
-        }
-        for (ObTableViewVO obTableInfoVO : oraObjList) {
-            if (!allTables.contains(obTableInfoVO.getViewName())) {
+        if (!ObjectUtils.isEmpty(obObjList)) {
+            for (ObTableViewVO obTableInfoVO : obObjList) {
                 allTables.add(obTableInfoVO.getViewName());
+
+            }
+        }
+        if (!ObjectUtils.isEmpty(oraObjList)) {
+            for (ObTableViewVO obTableInfoVO : oraObjList) {
+                if (!allTables.contains(obTableInfoVO.getViewName())) {
+                    allTables.add(obTableInfoVO.getViewName());
+                }
             }
         }
 

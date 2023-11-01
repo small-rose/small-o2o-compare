@@ -52,7 +52,7 @@ public class DataSourceConfiguration {
 
         for (DataSourceInfo config : dataSourceConfigs) {
             DataSource dataSource = createDataSource(config);
-            dataSourceMap.put(config.getName(), dataSource);
+            dataSourceMap.put(config.getName().toUpperCase(), dataSource);
         }
         //System.out.println(dataSourceMap);
         dynamicDataSource.setTargetDataSources(dataSourceMap);
