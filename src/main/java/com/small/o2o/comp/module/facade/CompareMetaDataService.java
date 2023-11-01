@@ -14,6 +14,7 @@ import com.small.o2o.comp.module.service.oracle.ObjectInfoService;
 import com.small.o2o.comp.module.service.oracle.ProcedureListService;
 import com.small.o2o.comp.module.service.oracle.SequencesService;
 import com.small.o2o.comp.module.service.oracle.TableColumnService;
+import com.small.o2o.comp.module.service.oracle.TableColumnStreamService;
 import com.small.o2o.comp.module.service.oracle.TableIndexService;
 import com.small.o2o.comp.module.service.oracle.TableListService;
 import com.small.o2o.comp.module.service.oracle.TablePrimaryKeyService;
@@ -39,7 +40,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * @description: TODO 功能角色说明：
+ * TODO 描述：
+ * @author: 张小菜
+ * @date: 2023/10/31 029 19:37
+ * @version: v1.0
+ */
 @Slf4j
 @Service
 public class CompareMetaDataService extends MetaDataCompare {
@@ -49,6 +56,8 @@ public class CompareMetaDataService extends MetaDataCompare {
     private TableListService tableListService ;
     @Autowired
     private TableColumnService tableColumnService ;
+    @Autowired
+    private TableColumnStreamService tableColumnStreamService ;
     @Autowired
     private TablePrimaryKeyService tablePrimaryKeyService ;
     @Autowired
@@ -97,7 +106,8 @@ public class CompareMetaDataService extends MetaDataCompare {
             } else if (2 == sheetEnum.getIndex()) {
                 log.info("开始查表和列");
                 long a = System.currentTimeMillis();
-                 List<OracleTableColumnFullVO> tableColumnVOList = tableColumnService.getTableColumnFulls() ;
+                //List<OracleTableColumnFullVO> tableColumnVOList = tableColumnService.getTableColumnFulls() ;
+                List<OracleTableColumnFullVO> tableColumnVOList = tableColumnStreamService.getTableColumnFulls() ;
                 long b = System.currentTimeMillis();
                 log.info("取数据耗时" + (b - a) / 100 + " s");
                 Sheet sheet = new Sheet(sheetEnum.getIndex(), 0);

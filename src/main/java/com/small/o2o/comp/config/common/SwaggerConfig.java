@@ -16,7 +16,13 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
+/**
+ * @description: TODO 功能角色说明：
+ * TODO 描述：
+ * @author: 张小菜
+ * @date: 2023/10/31 029 19:37
+ * @version: v1.0
+ */
 @EnableSwagger2
 @Configuration
 public class SwaggerConfig {

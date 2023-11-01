@@ -25,6 +25,13 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 
+/**
+ * @description: TODO 功能角色说明：
+ * TODO 描述：
+ * @author: 张小菜
+ * @date: 2023/11/1 029 1:37
+ * @version: v1.0
+ */
 @Slf4j
 @Service
 public class OracleMetaDataService  implements MetaDbTypeSQLService {

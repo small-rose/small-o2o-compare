@@ -4,6 +4,7 @@ import com.small.o2o.comp.config.annotation.DynamicDataSource;
 import com.small.o2o.comp.module.service.impl.ServiceStrategyFactory;
 import com.small.o2o.comp.module.vo.DSQueryPramsVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 
 import java.util.List;
 
@@ -23,7 +24,8 @@ public class QueryBuzTypeService {
 
     @DynamicDataSource
     public  <T> List<T> getCompareMetaList(DSQueryPramsVO queryPramsVO, Class clazz){
-        BuzTypeService metaDataService =  serviceStrategyFactory.getBuzTypeServiceStrategy(queryPramsVO.getDataSourceName());
+        Assert.hasText(queryPramsVO.getDataSourceName(), "MetaType元数据种类不允许为空");
+        BuzTypeService metaDataService =  serviceStrategyFactory.getBuzTypeServiceStrategy(queryPramsVO.getMetaType());
         return  metaDataService.getCompareMetaList(queryPramsVO, clazz);
     }
 

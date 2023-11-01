@@ -1,7 +1,6 @@
 package com.small.o2o.comp.module.facade;
 
 
-import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
 import com.small.o2o.comp.module.vo.DSCompareVO;
@@ -13,10 +12,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * @description: TODO 功能角色说明：
+ * TODO 描述：
+ * @author: 张小菜
+ * @date: 2023/10/31 029 19:37
+ * @version: v1.0
+ */
 @Slf4j
 @Service
- public class DiffTableColumnService {
+public class DiffTableColumnService {
 
     @Autowired
     private QueryMetaDataService queryMetaService;

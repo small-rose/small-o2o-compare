@@ -23,8 +23,13 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+
 /**
- * @author xiaocai
+ * @description: TODO 功能角色说明：
+ * TODO 描述：
+ * @author: 张小菜
+ * @date: 2023/11/1 029 1:37
+ * @version: v1.0
  */
 @Slf4j
 @Service
@@ -166,8 +171,8 @@ public class TableListService  implements BuzTypeService {
     public List<OracleTableViewVO> getTableViewList() {
         DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
 
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).build();
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).build();
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
 
         List<ObTableViewVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableViewVO.class);
         List<ObTableViewVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObTableViewVO.class);
@@ -176,11 +181,11 @@ public class TableListService  implements BuzTypeService {
         Map<String, ObTableViewVO> oracleObjMap = null;
         if (!ObjectUtils.isEmpty(obObjList)) {
             obObjMap = obObjList.stream().collect(
-                    Collectors.toMap(o -> o.getViewName(), (p) -> p));
+                    Collectors.toMap(ObTableViewVO::getViewName, e->e ,(oldVal, newVal) -> oldVal));
         }
         if (!ObjectUtils.isEmpty(oraObjList)) {
             oracleObjMap = oraObjList.stream().collect(
-                    Collectors.toMap(o -> o.getViewName(), Function.identity()));
+                    Collectors.toMap(o -> o.getViewName(), Function.identity(),(oldVal, newVal) -> oldVal));
         }
 
 

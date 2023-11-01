@@ -11,8 +11,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-
 /**
+ * @description: TODO 功能角色说明：
+ * TODO 描述：
+ * @author: 张小菜
+ * @date: 2023/10/31 029 19:37
+ * @version: v1.0
+ *
  *  默认的数据源
  */
 @Slf4j
