@@ -1,4 +1,4 @@
-package com.small.o2o.comp.module.facade.base;
+package com.small.o2o.comp.module.compare.base;
 
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;

@@ -1,4 +1,4 @@
-package com.small.o2o.comp.module.facade.base;
+package com.small.o2o.comp.module.compare.base;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;

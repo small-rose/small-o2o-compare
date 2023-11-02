@@ -1,7 +1,7 @@
 package com.small.o2o.comp.module.service.oracle;
 
 import com.small.o2o.comp.config.annotation.DynamicDataSource;
-import com.small.o2o.comp.module.service.impl.ServiceStrategyFactory;
+import com.small.o2o.comp.module.service.strategy.ServiceStrategyFactory;
 import com.small.o2o.comp.module.vo.DSQueryPramsVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;

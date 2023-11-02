@@ -2,8 +2,7 @@ package com.small.o2o.comp.sql;
 
 
 import com.small.o2o.comp.base.SmallO2oCompAppTest;
-import com.small.o2o.comp.module.facade.ExcelGenaratorService;
-import com.small.o2o.comp.module.facade.OracleCompareExcelService;
+import com.small.o2o.comp.module.compare.OracleCompareExcelService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -13,8 +12,8 @@ import java.time.format.DateTimeFormatter;
 
 public class GenerateObjExcelTest extends SmallO2oCompAppTest {
 
-    @Autowired
-    private ExcelGenaratorService excelGenaratorService ;
+    //@Autowired
+    //private ExcelGenaratorService excelGenaratorService ;
     @Autowired
     private OracleCompareExcelService obCompareExcelService ;
 

@@ -1,9 +1,8 @@
 package com.small.o2o.comp.module.service.oracle;
 
 
-import com.small.o2o.comp.config.datasource.DynamicDSContextHolder;
 import com.small.o2o.comp.core.constants.O2OConstants;
-import com.small.o2o.comp.module.facade.FilePickService;
+import com.small.o2o.comp.module.compare.FilePickService;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
 import com.small.o2o.comp.module.vo.DSCompareVO;
@@ -53,11 +52,9 @@ public class SequencesService  implements BuzTypeService {
         List<String> allNames = new ArrayList<>();
         DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
         List<ObSequencesVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObSequencesVO.class);
-        DynamicDSContextHolder.removeDataSourceType();
 
         DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
         List<ObSequencesVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObSequencesVO.class);
-        DynamicDSContextHolder.removeDataSourceType();
 
         if (!ObjectUtils.isEmpty(obObjList)) {
             obObjList.forEach(p -> allNames.add(p.getSequenceName()));

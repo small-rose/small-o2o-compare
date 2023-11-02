@@ -45,8 +45,8 @@ public class TypeListService implements BuzTypeService{
 
         DSCompareVO dsCompare = MetaDataContextHolder.getDsCompare();
         ;
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dsCompare.getDsFirst()).metaType("").build();
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dsCompare.getDsSecond()).metaType("").build();
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dsCompare.getDsFirst()).build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dsCompare.getDsSecond()).build();
         List<ObTypesVO> typesVOList = queryMetaService.queryObjectList(queryPramsVO, ObTypesVO.class);
         List<ObTypesVO> typesVOList2 = queryMetaService.queryObjectList(queryPramsVO2, ObTypesVO.class);
 

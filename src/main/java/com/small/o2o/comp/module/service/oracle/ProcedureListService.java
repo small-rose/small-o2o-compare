@@ -2,9 +2,7 @@ package com.small.o2o.comp.module.service.oracle;
 
 
 import cn.hutool.core.util.ObjectUtil;
-import com.small.o2o.comp.config.datasource.DynamicDSContextHolder;
 import com.small.o2o.comp.core.constants.O2OConstants;
-import com.small.o2o.comp.module.facade.FilePickService;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
 import com.small.o2o.comp.module.vo.DSCompareVO;
@@ -37,11 +35,10 @@ public class ProcedureListService  implements BuzTypeService {
     @Autowired
     private QueryMetaDataService queryMetaService;
 
-    private FilePickService filePickService ;
 
     @Override
     public String getBuzType() {
-        return O2OConstants.MetaBuzTypeEnum.OBJECT_INFO.getCode();
+        return O2OConstants.MetaBuzTypeEnum.PROCEDEURE.getCode();
     }
 
     @Override
@@ -52,19 +49,15 @@ public class ProcedureListService  implements BuzTypeService {
     public List<OracleProcedureVO> getProcedureList(String type) {
 
         DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
-        DynamicDSContextHolder.setDataSourceType(dscVO.getDsFirst());
         DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType())
                 .dataSourceName(dscVO.getDsFirst()).metaType(type).build();
         List<ObProcedureVO> procedureVOS = queryMetaService.queryObjectList(queryPramsVO, ObProcedureVO.class);
         //List<ObProcedureVO> procedureVOS1 = queryMetaService.queryNameListProcedureVO(queryPramsVO);
-        DynamicDSContextHolder.removeDataSourceType();
 
-        DynamicDSContextHolder.setDataSourceType(dscVO.getDsSecond());
         DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType())
                 .dataSourceName(dscVO.getDsSecond()).metaType(type).build();
         List<ObProcedureVO> procedureVOS2 = queryMetaService.queryObjectList(queryPramsVO2, ObProcedureVO.class);
         //List<ObProcedureVO> procedureVOS1 = queryMetaService.queryNameListProcedureVO(queryPramsVO);
-        DynamicDSContextHolder.removeDataSourceType();
 
         List<String> allNames = new ArrayList<>();
 
@@ -73,12 +66,12 @@ public class ProcedureListService  implements BuzTypeService {
         if (!ObjectUtils.isEmpty(procedureVOS)){
             procedureVOS.stream().forEach(p -> allNames.add(p.getObjectName().concat(p.getProcedureName() == null ? "" : p.getProcedureName())));
             procedureVOMap = procedureVOS.stream().collect(
-                    Collectors.toMap(p -> p.getObjectName().concat(p.getProcedureName()), (p) -> p));
+                    Collectors.toMap(p -> p.getObjectName().concat(p.getProcedureName() == null ? "" : p.getProcedureName()), (p) -> p));
         }
         if (!ObjectUtils.isEmpty(procedureVOS2)){
             procedureVOS2.stream().forEach(p -> allNames.add(p.getObjectName().concat(p.getProcedureName() == null ? "" : p.getProcedureName())));
             procedureVOMap2 = procedureVOS2.stream().collect(
-                    Collectors.toMap(p -> p.getObjectName().concat(p.getProcedureName()), Function.identity()));
+                    Collectors.toMap(p -> p.getObjectName().concat(p.getProcedureName() == null ? "" : p.getProcedureName()), Function.identity()));
         }
 
 

@@ -1,4 +1,4 @@
-package com.small.o2o.comp.module.service.impl;
+package com.small.o2o.comp.module.service.sql;
 
 import com.small.o2o.comp.config.annotation.DynamicDataSource;
 import com.small.o2o.comp.module.vo.DSQueryPramsVO;

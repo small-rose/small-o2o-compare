@@ -1,7 +1,8 @@
-package com.small.o2o.comp.module.service.impl;
+package com.small.o2o.comp.module.service.strategy;
 
 import com.small.o2o.comp.config.datasource.DataSourceTypeConfig;
 import com.small.o2o.comp.module.service.oracle.BuzTypeService;
+import com.small.o2o.comp.module.service.sql.MetaDbTypeSQLService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,7 @@ import java.util.List;
 
 /**
  * @description: TODO 功能角色说明：
- * TODO 描述：
+ * TODO 描述：SERVICE 策略路由
  * @author: 张小菜
  * @date: 2023/10/29 029 21:53
  * @version: v1.0
@@ -27,13 +28,13 @@ public class ServiceStrategyFactory {
 
 
     @Autowired
-    private DataSourceTypeConfig dataSourceTypeConfig ;
+    private DataSourceTypeConfig dstConfig ;
 
     private HashMap<String, String> dataSourceMap = new HashMap<>();
 
     @PostConstruct
     public void init(){
-        dataSourceMap.putAll(dataSourceTypeConfig.getDataSourceTypeMap());
+        dataSourceMap.putAll(dstConfig.getDataSourceTypeMap());
     }
 
 

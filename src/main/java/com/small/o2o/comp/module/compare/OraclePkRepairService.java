@@ -1,11 +1,11 @@
-package com.small.o2o.comp.module.facade;
+package com.small.o2o.comp.module.compare;
 
 
 import com.alibaba.excel.metadata.Sheet;
 import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
-import com.small.o2o.comp.module.facade.base.CommonGenerater;
-import com.small.o2o.comp.module.service.impl.MetaDbTypeSQLService;
+import com.small.o2o.comp.module.compare.base.CommonGenerater;
+import com.small.o2o.comp.module.service.sql.MetaDbTypeSQLService;
 import com.small.o2o.comp.module.vo.ORATablePrimaryKeyVO;
 import com.small.o2o.comp.module.vo.ObTablePrimaryKeyVO;
 import lombok.extern.slf4j.Slf4j;

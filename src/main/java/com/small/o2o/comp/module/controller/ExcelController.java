@@ -1,7 +1,7 @@
 package com.small.o2o.comp.module.controller;
 
 
-import com.small.o2o.comp.module.facade.ExcelGenaratorService;
+import com.small.o2o.comp.module.compare.ExcelGenaratorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;

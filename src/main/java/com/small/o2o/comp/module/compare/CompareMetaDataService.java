@@ -1,4 +1,4 @@
-package com.small.o2o.comp.module.facade;
+package com.small.o2o.comp.module.compare;
 
 
 import com.alibaba.excel.EasyExcel;
@@ -8,7 +8,7 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.small.o2o.comp.core.constants.O2OConstants;
 import com.small.o2o.comp.core.excel.CheckCellHandler;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
-import com.small.o2o.comp.module.facade.base.MetaDataCompare;
+import com.small.o2o.comp.module.compare.base.MetaDataCompare;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.oracle.ObjectInfoService;
 import com.small.o2o.comp.module.service.oracle.ProcedureListService;

@@ -64,8 +64,8 @@ public class TablePrimaryKeyService  implements BuzTypeService {
         List<String> tableList = new ArrayList<>();
         List<String> ddlList = new ArrayList<>();
 
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).tableName(tabName).build();
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).tableName(tabName).build();
+        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsFirst()).tableName(tabName).build();
+        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsSecond()).tableName(tabName).build();
         List<ObTableInfoVO> allTableList = MetaDataContextHolder.getAllTableList();
         if (CollectionUtils.isEmpty(allTableList)){
             List<String> tempList = new ArrayList<>();

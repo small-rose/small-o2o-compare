@@ -2,7 +2,7 @@ package com.small.o2o.comp.demo;
 
 import com.small.o2o.comp.base.SmallO2oCompAppTest;
 import com.small.o2o.comp.core.constants.O2OConstants;
-import com.small.o2o.comp.module.facade.CompareMetaDataService;
+import com.small.o2o.comp.module.compare.CompareMetaDataService;
 import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
 import com.small.o2o.comp.module.vo.DSCompareVO;
 import com.small.o2o.comp.module.vo.DSQueryPramsVO;

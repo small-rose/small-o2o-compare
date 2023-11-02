@@ -1,4 +1,4 @@
-package com.small.o2o.comp.module.facade;
+package com.small.o2o.comp.module.compare;
 
 
 import lombok.extern.slf4j.Slf4j;

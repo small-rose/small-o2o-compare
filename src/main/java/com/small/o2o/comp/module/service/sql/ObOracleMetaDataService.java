@@ -1,4 +1,4 @@
-package com.small.o2o.comp.module.service.impl;
+package com.small.o2o.comp.module.service.sql;
 
 
 import com.small.o2o.comp.core.constants.O2OConstants;
@@ -130,16 +130,29 @@ public class ObOracleMetaDataService implements MetaDbTypeSQLService {
 
     @Override
     public String queryTableIndexVoSQL(String tableName) {
-        String sql = "SELECT T.TABLE_NAME,T.INDEX_NAME,\n" +
-                "LISTAGG(CASE I.INDEX_TYPE WHEN 'NORMAL' THEN T.COLUMN_NAME ||' ' || T.DESCEND\n" +
-                "    ELSE T.COLUMN_NAME END , ',')WITHIN GROUP(ORDER BY T.TABLE_NAME, T.COLUMN_NAME) AS COLUMN_NAME\n" +
-                "       ,I.INDEX_TYPE, I.UNIQUENESS\n" +
-                "FROM USER_IND_COLUMNS T,USER_INDEXES I WHERE T.INDEX_NAME = I.INDEX_NAME AND T.TABLE_NAME = I.TABLE_NAME\n"  ;
-        if (StringUtils.hasText(tableName)){
-            sql += " AND I.TABLE_NAME = '"+tableName+"'" ;
+        String sql = "SELECT T.TABLE_NAME, T.INDEX_NAME,\n" +
+                "       LISTAGG(CASE\n" +
+                "                   WHEN INSTR(I.INDEX_TYPE, 'FUNCTION') > 0 THEN NEWCOLUMN_NAME\n" +
+                "                   ELSE T.COLUMN_NAME || ' ' || T.DESCEND END, ',')\n" +
+                "               WITHIN GROUP (ORDER BY T.TABLE_NAME,T.INDEX_NAME,T.COLUMN_POSITION) AS COLUMN_NAME,\n" +
+                "       I.INDEX_TYPE,\n" +
+                "       I.UNIQUENESS\n" +
+                "FROM (SELECT N.*,\n" +
+                "             (CASE\n" +
+                "                  WHEN INSTR(N.COLUMN_NAME, 'SYS_NC') > 0 THEN\n" +
+                "                      (SELECT INDEX_COLUMN_EXPRESSION(E.TABLE_NAME, E.INDEX_NAME, E.COLUMN_POSITION)\n" +
+                "                       FROM USER_IND_EXPRESSIONS E\n" +
+                "                       WHERE E.INDEX_NAME = N.INDEX_NAME AND E.COLUMN_POSITION = N.COLUMN_POSITION)\n" +
+                "                  ELSE N.COLUMN_NAME END) AS NEWCOLUMN_NAME\n" +
+                "      FROM USER_IND_COLUMNS N\n" ;
+        if (StringUtils.hasText(tableName)) {
+            sql+= "    WHERE N.TABLE_NAME = 'ACT_RU_CASE_EXECUTION'\n" ;
         }
-        sql += " GROUP BY  T.TABLE_NAME,T.INDEX_NAME ,I.INDEX_TYPE, I.UNIQUENESS ORDER BY T.TABLE_NAME,T.INDEX_NAME " ;
-
+        sql+= "    ) T, USER_INDEXES I\n" +
+                "WHERE T.INDEX_NAME = I.INDEX_NAME\n" +
+                "  AND T.TABLE_NAME = I.TABLE_NAME\n" +
+                "GROUP BY T.TABLE_NAME, T.INDEX_NAME, I.INDEX_TYPE, I.UNIQUENESS\n" +
+                "ORDER BY T.TABLE_NAME, T.INDEX_NAME "  ;
         return sql;
     }
 
@@ -340,20 +353,34 @@ public class ObOracleMetaDataService implements MetaDbTypeSQLService {
         return jdbcTemplateService.queryForList(sql, IndexExpressions.class);
     }
     /**
-     * 查 表索引
+     * 查 表索引 (包含普通索引和函數索引的表达式)
      * @return
      */
     @Override
     public List<ObTableIndexVO> queryTableIndexVO(String tableName){
-        String sql = "SELECT T.TABLE_NAME,T.INDEX_NAME,\n" +
-                "LISTAGG(CASE I.INDEX_TYPE WHEN 'NORMAL' THEN T.COLUMN_NAME ||' ' || T.DESCEND\n" +
-                "    ELSE T.COLUMN_NAME END , ',')WITHIN GROUP(ORDER BY T.TABLE_NAME, T.COLUMN_NAME) AS COLUMN_NAME\n" +
-                "       ,I.INDEX_TYPE, I.UNIQUENESS\n" +
-                "FROM USER_IND_COLUMNS T,USER_INDEXES I WHERE T.INDEX_NAME = I.INDEX_NAME AND T.TABLE_NAME = I.TABLE_NAME\n"  ;
-        if (StringUtils.hasText(tableName)){
-            sql += " AND I.TABLE_NAME = '"+tableName+"'" ;
+        String sql = "SELECT T.TABLE_NAME, T.INDEX_NAME,\n" +
+                "       LISTAGG(CASE\n" +
+                "                   WHEN INSTR(I.INDEX_TYPE, 'FUNCTION') > 0 THEN NEWCOLUMN_NAME\n" +
+                "                   ELSE T.COLUMN_NAME || ' ' || T.DESCEND END, ',')\n" +
+                "               WITHIN GROUP (ORDER BY T.TABLE_NAME,T.INDEX_NAME,T.COLUMN_POSITION) AS COLUMN_NAME,\n" +
+                "       I.INDEX_TYPE,\n" +
+                "       I.UNIQUENESS\n" +
+                "FROM (SELECT N.*,\n" +
+                "             (CASE\n" +
+                "                  WHEN INSTR(N.COLUMN_NAME, 'SYS_NC') > 0 THEN\n" +
+                "                      (SELECT INDEX_COLUMN_EXPRESSION(E.TABLE_NAME, E.INDEX_NAME, E.COLUMN_POSITION)\n" +
+                "                       FROM USER_IND_EXPRESSIONS E\n" +
+                "                       WHERE E.INDEX_NAME = N.INDEX_NAME AND E.COLUMN_POSITION = N.COLUMN_POSITION)\n" +
+                "                  ELSE N.COLUMN_NAME END) AS NEWCOLUMN_NAME\n" +
+                "      FROM USER_IND_COLUMNS N\n" ;
+        if (StringUtils.hasText(tableName)) {
+            sql+= "    WHERE N.TABLE_NAME = 'ACT_RU_CASE_EXECUTION'\n" ;
         }
-        sql += " GROUP BY  T.TABLE_NAME,T.INDEX_NAME ,I.INDEX_TYPE, I.UNIQUENESS ORDER BY T.TABLE_NAME,T.INDEX_NAME " ;
+        sql+= "    ) T, USER_INDEXES I\n" +
+                "WHERE T.INDEX_NAME = I.INDEX_NAME\n" +
+                "  AND T.TABLE_NAME = I.TABLE_NAME\n" +
+                "GROUP BY T.TABLE_NAME, T.INDEX_NAME, I.INDEX_TYPE, I.UNIQUENESS\n" +
+                "ORDER BY T.TABLE_NAME, T.INDEX_NAME "  ;
         return jdbcTemplateService.queryForList(sql, ObTableIndexVO.class);
     }
 

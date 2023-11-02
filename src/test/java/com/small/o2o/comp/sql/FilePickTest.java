@@ -1,7 +1,7 @@
 package com.small.o2o.comp.sql;
 
 import com.small.o2o.comp.base.SmallO2oCompAppTest;
-import com.small.o2o.comp.module.facade.FilePickService;
+import com.small.o2o.comp.module.compare.FilePickService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

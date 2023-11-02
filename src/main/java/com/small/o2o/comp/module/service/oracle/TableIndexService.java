@@ -2,12 +2,11 @@ package com.small.o2o.comp.module.service.oracle;
 
 
 import com.small.o2o.comp.core.constants.O2OConstants;
-import com.small.o2o.comp.module.facade.FilePickService;
+import com.small.o2o.comp.module.compare.FilePickService;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
 import com.small.o2o.comp.module.vo.DSCompareVO;
 import com.small.o2o.comp.module.vo.DSQueryPramsVO;
-import com.small.o2o.comp.module.vo.IndexExpressions;
 import com.small.o2o.comp.module.vo.ObTableIndexVO;
 import com.small.o2o.comp.module.vo.ObTableInfoVO;
 import com.small.o2o.comp.module.vo.OracleTableIndexVO;
@@ -19,8 +18,13 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -74,28 +78,30 @@ public class TableIndexService  implements BuzTypeService {
             queryPramsVO.setTableName(tabName);
             queryPramsVO2.setTableName(tabName);
         }
-        List<ObTableInfoVO> allTableList = MetaDataContextHolder.getAllTableList();
-        if (CollectionUtils.isEmpty(allTableList)){
-             List<String> tempList = new ArrayList<>();
-            //重新查询
-            List<ObTableInfoVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
-            if (!ObjectUtils.isEmpty(obObjList)) {
-                obObjList.forEach(t -> tempList.add(t.getTableName()));
-            }
-            List<ObTableInfoVO> obObjList2 = queryMetaService.queryObjectList(queryPramsVO2, ObTableInfoVO.class);;
-            if (!ObjectUtils.isEmpty(obObjList)) {
-                obObjList2.forEach(t-> tempList.add(t.getTableName()));
-            }
-            tableList.addAll(tempList.stream().distinct().collect(Collectors.toList()));
-
+        if (StringUtils.hasText(tabName)){
+            tableList.add(tabName);
         }else{
-             List<ObTableInfoVO> obObjList2 = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
-            for (ObTableInfoVO tableInfoVO : obObjList2) {
-                tableList.add(tableInfoVO.getTableName());
+            List<ObTableInfoVO> allTableList = MetaDataContextHolder.getAllTableList();
+            if (CollectionUtils.isEmpty(allTableList)){
+                List<String> tempList = new ArrayList<>();
+                //重新查询
+                List<ObTableInfoVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
+                if (!ObjectUtils.isEmpty(obObjList)) {
+                    obObjList.forEach(t -> tempList.add(t.getTableName()));
+                }
+                List<ObTableInfoVO> obObjList2 = queryMetaService.queryObjectList(queryPramsVO2, ObTableInfoVO.class);;
+                if (!ObjectUtils.isEmpty(obObjList)) {
+                    obObjList2.forEach(t-> tempList.add(t.getTableName()));
+                }
+                tableList.addAll(tempList.stream().distinct().collect(Collectors.toList()));
+
+            }else {
+                for (ObTableInfoVO tableInfoVO : allTableList) {
+                    tableList.add(tableInfoVO.getTableName());
+                }
             }
         }
-
-
+        /*
         List<IndexExpressions> obieList = queryMetaService.queryTableIndexExpressions(queryPramsVO);
         List<IndexExpressions> oraieList = queryMetaService.queryTableIndexExpressions(queryPramsVO2);
         Map<String, String> obFunIndexMap = null;
@@ -108,14 +114,28 @@ public class TableIndexService  implements BuzTypeService {
             oracleFunIndexMap = oraieList.stream().collect(
                     Collectors.toMap(IndexExpressions::getIndexName, IndexExpressions::getColumnExpression));
         }
-
+        */
+        List<ObTableIndexVO> obIndexList = queryMetaService.queryObjectList(queryPramsVO, ObTableIndexVO.class);
+        List<ObTableIndexVO> oraIndexList = queryMetaService.queryObjectList(queryPramsVO2, ObTableIndexVO.class);
+        ConcurrentMap<String, List<ObTableIndexVO>> tabLeftMap = new ConcurrentHashMap<>();
+        ConcurrentMap<String, List<ObTableIndexVO>> tabRightMap = new ConcurrentHashMap<>();
+        Set<String> allTableSet = new HashSet<>();
+        if (!ObjectUtils.isEmpty(obIndexList)) {
+            tabLeftMap = obIndexList.parallelStream().collect(Collectors.groupingByConcurrent(ObTableIndexVO::getTableName));
+            allTableSet.addAll(tabLeftMap.keySet());
+        }
+        if (!ObjectUtils.isEmpty(oraIndexList)) {
+            tabRightMap = oraIndexList.parallelStream().collect(Collectors.groupingByConcurrent(ObTableIndexVO::getTableName));
+            allTableSet.addAll(tabRightMap.keySet());
+        }
         int i = 0 ;
-        for (String tableName : tableList) {
+        Map<String, ObTableIndexVO> obObjMap = new HashMap<>();
+        Map<String, ObTableIndexVO> oracleObjMap = new HashMap<>();
+        OracleTableIndexVO object = null;
+        for (String tableName : allTableSet) {
 
-            queryPramsVO.setTableName(tableName);
-            List<ObTableIndexVO> obObjList = queryMetaService.queryTableIndexVO(queryPramsVO);
-            queryPramsVO2.setTableName(tableName);
-            List<ObTableIndexVO> oraObjList = queryMetaService.queryTableIndexVO(queryPramsVO2);
+            List<ObTableIndexVO> obObjList = tabLeftMap.get(tableName);
+            List<ObTableIndexVO> oraObjList = tabRightMap.get(tableName);
 
             System.out.println(i+" Table "+tableName+"  ob indexs " +obObjList.size() +" oracle indexs " +oraObjList.size());
             i++;
@@ -124,25 +144,25 @@ public class TableIndexService  implements BuzTypeService {
             }
             List<String> allIndexs = new ArrayList<>();
 
-            Map<String, ObTableIndexVO> obObjMap = obObjList.stream().collect(
-                    Collectors.toMap(o -> o.getIndexName(), (p) -> p));
-
-            Map<String, ObTableIndexVO> oracleObjMap = oraObjList.stream().collect(
-                    Collectors.toMap(o -> o.getIndexName(), Function.identity()));
-
-            for (ObTableIndexVO p : oraObjList) {
-                if (!allIndexs.contains(p.getIndexName())) {
-                    allIndexs.add(p.getIndexName());
+            if(!ObjectUtils.isEmpty(obObjList)) {
+                for (ObTableIndexVO p : oraObjList) {
+                    if (!allIndexs.contains(p.getIndexName())) {
+                        allIndexs.add(p.getIndexName());
+                    }
                 }
+                obObjMap = obObjList.stream().collect(
+                        Collectors.toMap(o -> o.getIndexName(), (p) -> p));
             }
-            for (ObTableIndexVO p : obObjList) {
-                if (!allIndexs.contains(p.getIndexName())) {
-                    allIndexs.add(p.getIndexName());
+            if(!ObjectUtils.isEmpty(obObjList)) {
+                for (ObTableIndexVO p : obObjList) {
+                    if (!allIndexs.contains(p.getIndexName())) {
+                        allIndexs.add(p.getIndexName());
+                    }
                 }
+                oracleObjMap = oraObjList.stream().collect(
+                        Collectors.toMap(o -> o.getIndexName(), Function.identity()));
             }
 
-
-            OracleTableIndexVO object = null;
             int indexNo = 1;
             for (String n : allIndexs) {
                 object = new OracleTableIndexVO();
@@ -151,35 +171,24 @@ public class TableIndexService  implements BuzTypeService {
 
                 ObTableIndexVO tmpob = obObjMap.get(n);
                 ObTableIndexVO tmpora = oracleObjMap.get(n);
-                //if (obList.size() > 0){
-                if (tmpob != null) {
+                if (!ObjectUtils.isEmpty(tmpob)) {
                     ObTableIndexVO ob = tmpob;
                     object.setTableName(ob.getTableName());
                     object.setIndexName(ob.getIndexName());
                     object.setColumnName(ob.getColumnName());
-                    if (ob.getIndexType()!=null && ob.getIndexType().startsWith("FUNCTION-")){
-                        String columnName = obFunIndexMap.get(ob.getIndexName());
-                        String result = ob.getColumnName().replaceAll("SYS_NC\\d+\\$", columnName);
-                        object.setColumnName(result);
-                    }
                     object.setIndexType(ob.getIndexType());
                     object.setUniqueness(ob.getUniqueness());
                 }
-                if (tmpora != null) {
+                if (!ObjectUtils.isEmpty(tmpora)) {
                     ObTableIndexVO oracle = tmpora;
                     object.setTableName2(oracle.getTableName());
                     object.setIndexName2(oracle.getIndexName());
                     object.setColumnName2(oracle.getColumnName());
-                    if (oracle.getIndexType()!=null && oracle.getIndexType().startsWith("FUNCTION-")){
-                        String columnName = oracleFunIndexMap.get(oracle.getIndexName());
-                        String result = object.getColumnName2().replaceAll("SYS_NC\\d+\\$", columnName);
-                        object.setColumnName2(result);
-                    }
                     object.setIndexType2(oracle.getIndexType());
                     object.setUniqueness2(oracle.getUniqueness());
                 }
 
-
+                // TODO 生成索引建议的特殊处理
                 // ORACLE 有， OB 沒有，--有能是名字不一样
                 if (tmpora!=null && tmpob==null){
                     String ddl = String.format(DROP_DDL, tmpora.getIndexName());
