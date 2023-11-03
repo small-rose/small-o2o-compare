@@ -22,15 +22,29 @@ init:
       username: BVIS
       password: bvis123
       dbType: ORACLE
+      dbDesc: oracle的开发环境
     - name: ORACLE_SIT
       driverName: oracle.jdbc.OracleDriver
       url: jdbc:oracle:thin:@192.168.10.118:1521:orcl
       username: BVIS
       password: bvis123
-      dbType: ORACLE
+      dbType: OB_ORACLE
     - name: MYSQL_57
       driverName: com.mysql.cj.jdbc.Driver
       url: jdbc:mysql://192.168.10.184:3306/bp_dev
       username: sf_dev_01
       password: Sf@123321
       dbType: MYSQL
+    - name: MYSQL_57_NEW
+      driverName: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://192.168.10.184:3306/bp_dev
+      username: sf_dev_01
+      password: Sf@123321
+      dbType: OB_MYSQL
+    - name: ORACLE_DEV_OLD
+      driverName: oracle.jdbc.OracleDriver
+      url: jdbc:oracle:thin:@192.168.10.118:1521:orcl
+      username: BVIS
+      password: bvis123
+      dbType: ORACLE
+      dbDesc: oracle的开发环境
