@@ -18,6 +18,8 @@ public class DataSourceInfo {
     private String url ;
     private String username ;
     private String password ;
+    private String dbType ;
+    private String dbDesc ;
     private String ifValid ;
     private String ext1 ;
     private String ext2 ;
@@ -31,8 +33,8 @@ public class DataSourceInfo {
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", ifValid='" + ifValid + '\'' +
-                ", ext1='" + ext1 + '\'' +
-                ", ext2='" + ext2 + '\'' +
+                ", dbType='" + dbType + '\'' +
+                ", dbDesc='" + dbDesc + '\'' +
                 '}';
     }
 }

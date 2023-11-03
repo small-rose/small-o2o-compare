@@ -42,28 +42,6 @@ public class O2OConstants {
         }
     }
 
-    public enum DBType{
-        ORACLE("ORACLE"),
-        OB_ORACLE( "OB_ORACLE"),
-        MYSQL("MYSQL"),
-        OB_MYSQL( "OB_MYSQL");
-
-
-        private String value ;
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        DBType(String value) {
-            this.value = value;
-        }
-    }
-
     public enum MetaBuzTypeEnum {
         OBJECT_INFO(0, "OBJECT","元数据信息汇总"),
         TABLE_INFO(1, "TABLE","表信息"),

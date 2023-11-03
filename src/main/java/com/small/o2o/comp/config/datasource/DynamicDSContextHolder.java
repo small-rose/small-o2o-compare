@@ -1,6 +1,6 @@
 package com.small.o2o.comp.config.datasource;
 
-import com.small.o2o.comp.core.enums.DataSourcesType;
+import com.small.o2o.comp.core.enums.DBType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ public class DynamicDSContextHolder {
      */
     public static String getDataSourceType() {
         String key = contextHolder.get();
-        return  key ==null ? DataSourcesType.DEFAULT.name() : key;
+        return  key ==null ? DBType.DEFAULT.name() : key;
     }
 
     /**
@@ -41,7 +41,7 @@ public class DynamicDSContextHolder {
      */
     public static void removeDataSourceType() {
         //log.info("移除{}数据源", getDataSourceType());
-        if (!DataSourcesType.DEFAULT.name().equals(getDataSourceType())) {
+        if (!DBType.DEFAULT.name().equals(getDataSourceType())) {
             contextHolder.remove();
             log.info("移除{}数据源", getDataSourceType());
         }

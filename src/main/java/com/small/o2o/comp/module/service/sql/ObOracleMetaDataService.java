@@ -2,20 +2,10 @@ package com.small.o2o.comp.module.service.sql;
 
 
 import com.small.o2o.comp.core.constants.O2OConstants;
+import com.small.o2o.comp.core.enums.DBType;
 import com.small.o2o.comp.core.exception.BussinessException;
 import com.small.o2o.comp.module.service.meta.JdbcTemplateService;
-import com.small.o2o.comp.module.vo.DSQueryPramsVO;
-import com.small.o2o.comp.module.vo.IndexExpressions;
-import com.small.o2o.comp.module.vo.ObObjectInfoVO;
-import com.small.o2o.comp.module.vo.ObProcedureVO;
-import com.small.o2o.comp.module.vo.ObSequencesVO;
-import com.small.o2o.comp.module.vo.ObTableColumnFullVO;
-import com.small.o2o.comp.module.vo.ObTableIndexVO;
-import com.small.o2o.comp.module.vo.ObTableInfoVO;
-import com.small.o2o.comp.module.vo.ObTablePartitionVO;
-import com.small.o2o.comp.module.vo.ObTablePrimaryKeyVO;
-import com.small.o2o.comp.module.vo.ObTableViewVO;
-import com.small.o2o.comp.module.vo.ObTypesVO;
+import com.small.o2o.comp.module.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,7 +32,7 @@ public class ObOracleMetaDataService implements MetaDbTypeSQLService {
 
     @Override
     public String getDbType() {
-        return O2OConstants.DBType.OB_ORACLE.getValue();
+        return  DBType.OB_ORACLE.name();
     }
 
     @Override

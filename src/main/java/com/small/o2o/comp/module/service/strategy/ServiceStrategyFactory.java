@@ -1,6 +1,6 @@
 package com.small.o2o.comp.module.service.strategy;
 
-import com.small.o2o.comp.config.datasource.DataSourceTypeConfig;
+import com.small.o2o.comp.config.datasource.InitDataSourceType;
 import com.small.o2o.comp.module.service.oracle.BuzTypeService;
 import com.small.o2o.comp.module.service.sql.MetaDbTypeSQLService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class ServiceStrategyFactory {
 
 
     @Autowired
-    private DataSourceTypeConfig dstConfig ;
+    private InitDataSourceType dstConfig ;
 
     private HashMap<String, String> dataSourceMap = new HashMap<>();
 

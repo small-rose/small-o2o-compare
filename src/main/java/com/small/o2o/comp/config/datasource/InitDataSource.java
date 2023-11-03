@@ -12,9 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -52,15 +50,19 @@ public class InitDataSource {
             dataSourceList.addAll(queryList);
             checkDataSource();
         }else {
-            throw new DataCheckException("dsInitType 的值不能识别，可用枚举：[conf,db]");
+            throw new DataCheckException("初始化数据源的方式 dsInitType 的值不能识别，可用枚举：[conf,db]");
         }
     }
 
     public void checkDataSource(){
-        List<String> list = dataSourceList.stream().map(s -> s.getName()).collect(Collectors.toList());
+        List<String> list = dataSourceList.stream().map(DataSourceInfo::getName).collect(Collectors.toList());
         HashSet<String> hashSet = new HashSet<>(list);
         if (list.size() != hashSet.size()) {
-            throw new DataCheckException("需要比较的数据源名称不允许重复！");
+            Map<String, Long> counts = list.stream().collect(Collectors.groupingBy(e -> e, Collectors.counting()));
+            List<String> duplicateNames = counts.entrySet().stream()
+                    .filter(entry -> entry.getValue() > 1)
+                    .map(Map.Entry::getKey).collect(Collectors.toList());
+            throw new DataCheckException("初始化数据源列表的name "+Arrays.toString(duplicateNames.toArray())+"出现重复值！");
         }
     }
 }
