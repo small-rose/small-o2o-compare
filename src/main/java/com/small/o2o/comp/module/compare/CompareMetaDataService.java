@@ -89,10 +89,14 @@ public class CompareMetaDataService extends MetaDataCompare {
         DsQueryPrams params = DsQueryPrams.builder().build();
         for (MetaBuzTypeEnum buzTypeEnum :  MetaBuzTypeEnum.values()) {
 
+            if (!buzTypeEnum.name().startsWith("META_")){
+                continue;
+            }
             params.setMetaBuzType(buzTypeEnum);
             if (MetaBuzTypeEnum.META_FUNCTION.equals(buzTypeEnum) || MetaBuzTypeEnum.META_PROCEDURE.equals(buzTypeEnum)
                     || MetaBuzTypeEnum.META_PACKAGE.equals(buzTypeEnum)) {
                 params.setQueryParam(buzTypeEnum.getCode());
+                params.setMetaBuzType(MetaBuzTypeEnum.META_PROCEDURE);
             }
             List tableInfoList = queryBuzTypeService.getCompareMetaList(params);
             Sheet sheet = new Sheet(buzTypeEnum.getIndex(), 0);

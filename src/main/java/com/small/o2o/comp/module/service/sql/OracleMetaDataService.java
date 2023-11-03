@@ -82,7 +82,7 @@ public class OracleMetaDataService implements MetaDbTypeSQLService {
                 sql = queryProcedureVoSQL(pramsVO.getQueryParam());
                 break;
             default:
-                throw new BussinessException("不支持的元数据枚举查询");
+                throw new BussinessException("不支持的元数据枚举查询"+pramsVO.getMetaBuzType());
         }
         System.out.println("ORACLE " + pramsVO.getMetaBuzType().getCode() + " >>> SQL \n " + sql);
         return jdbcTemplateService.queryForList(sql, clazz);
