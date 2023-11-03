@@ -1,12 +1,12 @@
 package com.small.o2o.comp.module.service.oracle;
 
 
-import com.small.o2o.comp.core.constants.O2OConstants;
+import com.small.o2o.comp.core.enums.MetaBuzTypeEnum;
 import com.small.o2o.comp.module.compare.FilePickService;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
-import com.small.o2o.comp.module.vo.DSCompareVO;
-import com.small.o2o.comp.module.vo.DSQueryPramsVO;
+import com.small.o2o.comp.module.param.DsCompareParam;
+import com.small.o2o.comp.module.param.DsQueryPrams;
 import com.small.o2o.comp.module.vo.ObSequencesVO;
 import com.small.o2o.comp.module.vo.OracleSequencesVO;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class SequencesService  implements BuzTypeService {
+public class MetaSequenceListService implements MetaBuzTypeService {
 
     @Autowired
     private QueryMetaDataService queryMetaService;
@@ -36,24 +36,25 @@ public class SequencesService  implements BuzTypeService {
     private FilePickService filePickService ;
 
     @Override
-    public String getBuzType() {
-        return O2OConstants.MetaBuzTypeEnum.SEQUENCES.getCode();
+    public MetaBuzTypeEnum getBuzType() {
+
+        return MetaBuzTypeEnum.META_SEQUENCES;
     }
 
     @Override
-    public  List getCompareMetaList(DSQueryPramsVO queryPramsVO, Class clazz) {
+    public  List getCompareMetaList(DsQueryPrams queryPramsVO) {
         return getSequences();
     }
 
 
     public List<OracleSequencesVO> getSequences() {
-        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
+        DsCompareParam dscVO = MetaDataContextHolder.getDsCompare();
 
         List<String> allNames = new ArrayList<>();
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
+        DsQueryPrams queryPramsVO = DsQueryPrams.builder().metaBuzType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
         List<ObSequencesVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObSequencesVO.class);
 
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
+        DsQueryPrams queryPramsVO2 = DsQueryPrams.builder().metaBuzType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
         List<ObSequencesVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObSequencesVO.class);
 
         if (!ObjectUtils.isEmpty(obObjList)) {

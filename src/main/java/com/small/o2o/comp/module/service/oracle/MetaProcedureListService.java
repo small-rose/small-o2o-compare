@@ -2,11 +2,11 @@ package com.small.o2o.comp.module.service.oracle;
 
 
 import cn.hutool.core.util.ObjectUtil;
-import com.small.o2o.comp.core.constants.O2OConstants;
+import com.small.o2o.comp.core.enums.MetaBuzTypeEnum;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
-import com.small.o2o.comp.module.vo.DSCompareVO;
-import com.small.o2o.comp.module.vo.DSQueryPramsVO;
+import com.small.o2o.comp.module.param.DsCompareParam;
+import com.small.o2o.comp.module.param.DsQueryPrams;
 import com.small.o2o.comp.module.vo.ObProcedureVO;
 import com.small.o2o.comp.module.vo.OracleProcedureVO;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class ProcedureListService  implements BuzTypeService {
+public class MetaProcedureListService implements MetaBuzTypeService {
 
 
     @Autowired
@@ -37,25 +37,26 @@ public class ProcedureListService  implements BuzTypeService {
 
 
     @Override
-    public String getBuzType() {
-        return O2OConstants.MetaBuzTypeEnum.PROCEDEURE.getCode();
+    public MetaBuzTypeEnum getBuzType() {
+
+        return  MetaBuzTypeEnum.META_PROCEDURE;
     }
 
     @Override
-    public  List getCompareMetaList(DSQueryPramsVO queryPramsVO, Class clazz) {
-        return getProcedureList(queryPramsVO.getMetaType());
+    public  List getCompareMetaList(DsQueryPrams queryPramsVO) {
+        return getProcedureList(queryPramsVO.getQueryParam());
     }
 
     public List<OracleProcedureVO> getProcedureList(String type) {
 
-        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType())
-                .dataSourceName(dscVO.getDsFirst()).metaType(type).build();
+        DsCompareParam dscVO = MetaDataContextHolder.getDsCompare();
+        DsQueryPrams queryPramsVO = DsQueryPrams.builder().metaBuzType(getBuzType())
+                .dataSourceName(dscVO.getDsFirst()).queryParam(type).build();
         List<ObProcedureVO> procedureVOS = queryMetaService.queryObjectList(queryPramsVO, ObProcedureVO.class);
         //List<ObProcedureVO> procedureVOS1 = queryMetaService.queryNameListProcedureVO(queryPramsVO);
 
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType())
-                .dataSourceName(dscVO.getDsSecond()).metaType(type).build();
+        DsQueryPrams queryPramsVO2 = DsQueryPrams.builder().metaBuzType(getBuzType())
+                .dataSourceName(dscVO.getDsSecond()).queryParam(type).build();
         List<ObProcedureVO> procedureVOS2 = queryMetaService.queryObjectList(queryPramsVO2, ObProcedureVO.class);
         //List<ObProcedureVO> procedureVOS1 = queryMetaService.queryNameListProcedureVO(queryPramsVO);
 

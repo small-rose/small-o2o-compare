@@ -1,4 +1,4 @@
-package com.small.o2o.comp.module.vo;
+package com.small.o2o.comp.module.param;
 
 import com.small.o2o.comp.core.utils.PathUtils;
 import lombok.Builder;
@@ -15,7 +15,7 @@ import org.springframework.util.StringUtils;
 
 @Builder
 @Data
-public class DSCompareVO {
+public class DsCompareParam {
 
     private static final String DEFAULT_PATH =  "";
 

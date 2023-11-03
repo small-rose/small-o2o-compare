@@ -5,7 +5,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
-import com.small.o2o.comp.module.vo.DSCompareVO;
+import com.small.o2o.comp.module.param.DsCompareParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -27,7 +27,7 @@ public class ExcelGenaratorService {
     private CompareMetaDataService compareMetaDataService ;
 
 
-    public void doHandle(DSCompareVO dsCompare) {
+    public void doHandle(DsCompareParam dsCompare) {
         compareMetaDataService.doCompareHandler(dsCompare);
     }
 

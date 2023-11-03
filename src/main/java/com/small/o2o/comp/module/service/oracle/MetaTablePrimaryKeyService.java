@@ -1,11 +1,12 @@
 package com.small.o2o.comp.module.service.oracle;
 
 
-import com.small.o2o.comp.core.constants.O2OConstants;
+import com.small.o2o.comp.core.enums.MetaBuzTypeEnum;
+import com.small.o2o.comp.core.utils.SmallUtils;
+import com.small.o2o.comp.module.param.DsCompareParam;
+import com.small.o2o.comp.module.param.DsQueryPrams;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
-import com.small.o2o.comp.module.vo.DSCompareVO;
-import com.small.o2o.comp.module.vo.DSQueryPramsVO;
 import com.small.o2o.comp.module.vo.ObTableInfoVO;
 import com.small.o2o.comp.module.vo.ObTablePrimaryKeyVO;
 import com.small.o2o.comp.module.vo.OracleTablePrimaryKeyVO;
@@ -14,10 +15,15 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -31,19 +37,19 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class TablePrimaryKeyService  implements BuzTypeService {
+public class MetaTablePrimaryKeyService implements MetaBuzTypeService {
 
 
     @Autowired
     private QueryMetaDataService queryMetaService;
 
     @Override
-    public String getBuzType() {
-        return O2OConstants.MetaBuzTypeEnum.TABLE_PRIMARYKEY.getCode();
+    public MetaBuzTypeEnum getBuzType() {
+        return  MetaBuzTypeEnum.META_TAB_PRIMARY_KEY;
     }
 
     @Override
-    public  List getCompareMetaList(DSQueryPramsVO queryPramsVO, Class clazz) {
+    public  List getCompareMetaList(DsQueryPrams queryPramsVO) {
         return getTablePrimaryKey(queryPramsVO.getTableName());
     }
 
@@ -58,65 +64,85 @@ public class TablePrimaryKeyService  implements BuzTypeService {
      */
     public List<OracleTablePrimaryKeyVO> getTablePrimaryKey(String tabName) {
 
-        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
+        DsCompareParam dscVO = MetaDataContextHolder.getDsCompare();
         List<OracleTablePrimaryKeyVO> resultList = new ArrayList<>();
 
         List<String> tableList = new ArrayList<>();
         List<String> ddlList = new ArrayList<>();
 
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsFirst()).tableName(tabName).build();
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsSecond()).tableName(tabName).build();
-        List<ObTableInfoVO> allTableList = MetaDataContextHolder.getAllTableList();
-        if (CollectionUtils.isEmpty(allTableList)){
-            List<String> tempList = new ArrayList<>();
-            //重新查询
-            List<ObTableInfoVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
-            if (!ObjectUtils.isEmpty(obObjList)) {
-                obObjList.forEach(t -> tempList.add(t.getTableName()));
-            }
-            List<ObTableInfoVO> obObjList2 = queryMetaService.queryObjectList(queryPramsVO2, ObTableInfoVO.class);
-            if (!ObjectUtils.isEmpty(obObjList2)) {
-                obObjList2.forEach(t -> tempList.add(t.getTableName()));
-            }
-            tableList = tempList.stream().distinct().collect(Collectors.toList());
+        DsQueryPrams queryPramsVO = DsQueryPrams.builder().metaBuzType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
+        DsQueryPrams queryPramsVO2 = DsQueryPrams.builder().metaBuzType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
 
+        if (StringUtils.hasText(tabName)){
+            tableList.add(tabName);
+            queryPramsVO.setTableName(tabName);
+            queryPramsVO2.setTableName(tabName);
         }else{
-            List<ObTableInfoVO> obObjList2 = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
-            if (!ObjectUtils.isEmpty(obObjList2)) {
-                for (ObTableInfoVO tableInfoVO : obObjList2) {
+            List<ObTableInfoVO> allTableList = MetaDataContextHolder.getAllTableList();
+            if (CollectionUtils.isEmpty(allTableList)){
+                List<String> tempList = new ArrayList<>();
+                //重新查询
+                List<ObTableInfoVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
+                if (!ObjectUtils.isEmpty(obObjList)) {
+                    obObjList.forEach(t -> tempList.add(t.getTableName()));
+                }
+                List<ObTableInfoVO> obObjList2 = queryMetaService.queryObjectList(queryPramsVO2, ObTableInfoVO.class);
+                if (!ObjectUtils.isEmpty(obObjList2)) {
+                    obObjList2.forEach(t -> tempList.add(t.getTableName()));
+                }
+                tableList = tempList.stream().distinct().collect(Collectors.toList());
+
+            }else{
+                for (ObTableInfoVO tableInfoVO : allTableList) {
                     tableList.add(tableInfoVO.getTableName());
                 }
             }
         }
 
-        int i = 0 ;
-        for (String tableName : tableList) {
+        List<ObTablePrimaryKeyVO> obPkList = queryMetaService.queryObjectList(queryPramsVO, ObTablePrimaryKeyVO.class);
+        List<ObTablePrimaryKeyVO> oraPkList = queryMetaService.queryObjectList(queryPramsVO2, ObTablePrimaryKeyVO.class);
 
-            queryPramsVO.setTableName(tableName);
-            List<ObTablePrimaryKeyVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTablePrimaryKeyVO.class);
-            queryPramsVO2.setTableName(tableName);
-            List<ObTablePrimaryKeyVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObTablePrimaryKeyVO.class);
-            System.out.println(i+" Table primary key  "+tableName+"  ob primarykey " +obObjList.size() +" oracle primarykey " +oraObjList.size());
-            i++;
-            if (ObjectUtils.isEmpty(obObjList) && ObjectUtils.isEmpty(oraObjList) ){
+        ConcurrentMap<String, List<ObTablePrimaryKeyVO>> tabLeftMap = new ConcurrentHashMap<>();
+        ConcurrentMap<String, List<ObTablePrimaryKeyVO>> tabRightMap = new ConcurrentHashMap<>();
+        Set<String> allTableSet = new HashSet<>();
+        if (SmallUtils.isNotEmpty(obPkList)){
+            tabLeftMap = obPkList.parallelStream().collect(Collectors.groupingByConcurrent(ObTablePrimaryKeyVO::getTableName));
+            allTableSet.addAll(tabLeftMap.keySet());
+        }
+        if (SmallUtils.isNotEmpty(oraPkList)){
+            tabRightMap = oraPkList.parallelStream().collect(Collectors.groupingByConcurrent(ObTablePrimaryKeyVO::getTableName));
+            allTableSet.addAll(tabRightMap.keySet());
+        }
+
+        int i = 0 ;
+        Map<String, ObTablePrimaryKeyVO> obObjMap = null;
+        Map<String, ObTablePrimaryKeyVO> oracleObjMap = null;
+        for (String tableName : allTableSet) {
+
+            List<ObTablePrimaryKeyVO> leftList  = tabLeftMap.get(tableName);
+            List<ObTablePrimaryKeyVO> rightList  = tabRightMap.get(tableName);
+             i++;
+            if (SmallUtils.isEmpty(leftList) && SmallUtils.isEmpty(rightList) ){
                 continue;
             }
             List<String> allIndexs = new ArrayList<>();
 
-            Map<String, ObTablePrimaryKeyVO> obObjMap = obObjList.stream().collect(
-                    Collectors.toMap(ObTablePrimaryKeyVO::getConstraintName, (p) -> p));
-
-            Map<String, ObTablePrimaryKeyVO> oracleObjMap = oraObjList.stream().collect(
-                    Collectors.toMap(o -> o.getConstraintName(), Function.identity()));
-
-            for (ObTablePrimaryKeyVO p : oraObjList) {
-                if (!allIndexs.contains(p.getConstraintName())) {
-                    allIndexs.add(p.getConstraintName());
+            if (SmallUtils.isNotEmpty(leftList)) {
+                obObjMap = leftList.stream().collect(
+                        Collectors.toMap(ObTablePrimaryKeyVO::getConstraintName, (p) -> p));
+                for (ObTablePrimaryKeyVO p : leftList) {
+                    if (!allIndexs.contains(p.getConstraintName())) {
+                        allIndexs.add(p.getConstraintName());
+                    }
                 }
             }
-            for (ObTablePrimaryKeyVO p : obObjList) {
-                if (!allIndexs.contains(p.getConstraintName())) {
-                    allIndexs.add(p.getConstraintName());
+            if (SmallUtils.isNotEmpty(rightList)) {
+                oracleObjMap = rightList.stream().collect(
+                        Collectors.toMap(o -> o.getConstraintName(), Function.identity()));
+                for (ObTablePrimaryKeyVO p : rightList) {
+                    if (!allIndexs.contains(p.getConstraintName())) {
+                        allIndexs.add(p.getConstraintName());
+                    }
                 }
             }
 
@@ -130,14 +156,14 @@ public class TablePrimaryKeyService  implements BuzTypeService {
                 ObTablePrimaryKeyVO tmpob = obObjMap.get(n);
                 ObTablePrimaryKeyVO tmpora = oracleObjMap.get(n);
                 //if (obList.size() > 0){
-                if (tmpob != null) {
+                if (SmallUtils.isNotEmpty(tmpob)) {
                     ObTablePrimaryKeyVO ob = tmpob;
                     object.setTableName(ob.getTableName());
                     object.setConstraintName(ob.getConstraintName());
                     object.setColumnName(ob.getColumnName());
 
                 }
-                if (tmpora != null) {
+                if (SmallUtils.isNotEmpty(tmpora)) {
                     ObTablePrimaryKeyVO oracle = tmpora;
                     object.setTableName2(oracle.getTableName());
                     object.setConstraintName2(oracle.getConstraintName());

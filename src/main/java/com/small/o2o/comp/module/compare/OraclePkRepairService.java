@@ -2,7 +2,7 @@ package com.small.o2o.comp.module.compare;
 
 
 import com.alibaba.excel.metadata.Sheet;
-import com.small.o2o.comp.core.constants.O2OConstants;
+import com.small.o2o.comp.core.enums.MetaBuzTypeEnum;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
 import com.small.o2o.comp.module.compare.base.CommonGenerater;
 import com.small.o2o.comp.module.service.sql.MetaDbTypeSQLService;
@@ -33,7 +33,7 @@ import java.util.List;
 
     private List<MultipleSheelPropety>  getDatas() {
         ArrayList<MultipleSheelPropety> excelList = new ArrayList<>();
-        for (O2OConstants.MetaBuzTypeEnum sheetEnum : O2OConstants.MetaBuzTypeEnum.values()) {
+        for (MetaBuzTypeEnum sheetEnum : MetaBuzTypeEnum.values()) {
 
             if (12 == sheetEnum.getIndex()) {
                 log.info("开始查 " + sheetEnum.getCode());

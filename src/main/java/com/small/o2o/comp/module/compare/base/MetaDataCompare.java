@@ -2,7 +2,7 @@ package com.small.o2o.comp.module.compare.base;
 
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
-import com.small.o2o.comp.module.vo.DSCompareVO;
+import com.small.o2o.comp.module.param.DsCompareParam;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public abstract class MetaDataCompare {
     /*
      * 抽象方法，模板方法
      */
-    public final String doCompareHandler(DSCompareVO dsCompareVO){
+    public final String doCompareHandler(DsCompareParam dsCompareVO){
         initHolder(dsCompareVO);
         if (check()) {
             List<MultipleSheelPropety> result = queryData();
@@ -53,7 +53,7 @@ public abstract class MetaDataCompare {
         return null;
     }
 
-    protected void initHolder(DSCompareVO dsCompareVO){
+    protected void initHolder(DsCompareParam dsCompareVO){
         MetaDataContextHolder.setDsCompare(dsCompareVO);
     }
 

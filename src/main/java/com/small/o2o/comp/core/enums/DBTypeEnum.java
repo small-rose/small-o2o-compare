@@ -7,7 +7,7 @@ package com.small.o2o.comp.core.enums;
  * @date: 2023/10/31 029 19:37
  * @version: v1.0
  */
-public enum DBType {
+public enum DBTypeEnum {
 
     DEFAULT,
     ORACLE,

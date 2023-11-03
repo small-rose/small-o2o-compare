@@ -3,7 +3,7 @@ package com.small.o2o.comp.module.service.meta;
 import com.small.o2o.comp.config.annotation.DynamicDataSource;
 import com.small.o2o.comp.module.service.sql.MetaDbTypeSQLService;
 import com.small.o2o.comp.module.service.strategy.ServiceStrategyFactory;
-import com.small.o2o.comp.module.vo.DSQueryPramsVO;
+import com.small.o2o.comp.module.param.DsQueryPrams;
 import com.small.o2o.comp.module.vo.ObTablePartitionVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,19 +24,19 @@ public class QueryMetaDataService {
     private ServiceStrategyFactory serviceStrategyFactory ;
 
 
-    public  <T> List<T> queryObjectList(DSQueryPramsVO queryPramsVO, Class clazz){
+    public  <T> List<T> queryObjectList(DsQueryPrams queryPramsVO, Class clazz){
         MetaDbTypeSQLService metaDataService =  serviceStrategyFactory.getDbTypeServiceStrategy(queryPramsVO.getDataSourceName());
         return  metaDataService.getObjectList(queryPramsVO, clazz);
     }
 
 
     @DynamicDataSource
-    public List<ObTablePartitionVO> queryTablePartitionVO(DSQueryPramsVO queryPramsVO) {
+    public List<ObTablePartitionVO> queryTablePartitionVO(DsQueryPrams queryPramsVO) {
         MetaDbTypeSQLService metaDataService =  serviceStrategyFactory.getDbTypeServiceStrategy(queryPramsVO.getDataSourceName());
         return  metaDataService.queryTablePartitionVO();
     }
     @DynamicDataSource
-    public List<ObTablePartitionVO> queryTableReCords(DSQueryPramsVO queryPramsVO) {
+    public List<ObTablePartitionVO> queryTableReCords(DsQueryPrams queryPramsVO) {
         MetaDbTypeSQLService metaDataService =  serviceStrategyFactory.getDbTypeServiceStrategy(queryPramsVO.getDataSourceName());
         return  metaDataService.queryTableReCords();
     }

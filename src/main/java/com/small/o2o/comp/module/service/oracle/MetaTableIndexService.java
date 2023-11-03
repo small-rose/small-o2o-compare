@@ -1,12 +1,12 @@
 package com.small.o2o.comp.module.service.oracle;
 
 
-import com.small.o2o.comp.core.constants.O2OConstants;
+import com.small.o2o.comp.core.enums.MetaBuzTypeEnum;
 import com.small.o2o.comp.module.compare.FilePickService;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
-import com.small.o2o.comp.module.vo.DSCompareVO;
-import com.small.o2o.comp.module.vo.DSQueryPramsVO;
+import com.small.o2o.comp.module.param.DsCompareParam;
+import com.small.o2o.comp.module.param.DsQueryPrams;
 import com.small.o2o.comp.module.vo.ObTableIndexVO;
 import com.small.o2o.comp.module.vo.ObTableInfoVO;
 import com.small.o2o.comp.module.vo.OracleTableIndexVO;
@@ -37,19 +37,19 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class TableIndexService  implements BuzTypeService {
+public class MetaTableIndexService implements MetaBuzTypeService {
 
     @Autowired
     private QueryMetaDataService queryMetaService;
 
 
     @Override
-    public String getBuzType() {
-        return O2OConstants.MetaBuzTypeEnum.TABLE_INDEX.getCode();
+    public MetaBuzTypeEnum getBuzType() {
+        return  MetaBuzTypeEnum.META_TAB_INDEX;
     }
 
     @Override
-    public  List getCompareMetaList(DSQueryPramsVO queryPramsVO, Class clazz) {
+    public  List getCompareMetaList(DsQueryPrams queryPramsVO) {
         return getTableIndexs(queryPramsVO.getTableName());
     }
 
@@ -66,14 +66,14 @@ public class TableIndexService  implements BuzTypeService {
      */
     public List<OracleTableIndexVO> getTableIndexs(String tabName) {
 
-        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
+        DsCompareParam dscVO = MetaDataContextHolder.getDsCompare();
         List<String> ddlList = new ArrayList<>();
         List<OracleTableIndexVO> resultList = new ArrayList<>();
 
         List<String> tableList = new ArrayList<>();
 
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
+        DsQueryPrams queryPramsVO = DsQueryPrams.builder().metaBuzType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
+        DsQueryPrams queryPramsVO2 = DsQueryPrams.builder().metaBuzType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
         if (StringUtils.hasText(tabName)){
             queryPramsVO.setTableName(tabName);
             queryPramsVO2.setTableName(tabName);

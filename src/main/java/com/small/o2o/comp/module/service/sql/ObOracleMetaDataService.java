@@ -1,11 +1,22 @@
 package com.small.o2o.comp.module.service.sql;
 
 
-import com.small.o2o.comp.core.constants.O2OConstants;
-import com.small.o2o.comp.core.enums.DBType;
+import com.small.o2o.comp.core.enums.DBTypeEnum;
+import com.small.o2o.comp.core.enums.MetaBuzTypeEnum;
 import com.small.o2o.comp.core.exception.BussinessException;
 import com.small.o2o.comp.module.service.meta.JdbcTemplateService;
-import com.small.o2o.comp.module.vo.*;
+import com.small.o2o.comp.module.param.DsQueryPrams;
+import com.small.o2o.comp.module.vo.IndexExpressions;
+import com.small.o2o.comp.module.vo.ObObjectInfoVO;
+import com.small.o2o.comp.module.vo.ObProcedureVO;
+import com.small.o2o.comp.module.vo.ObSequencesVO;
+import com.small.o2o.comp.module.vo.ObTableColumnFullVO;
+import com.small.o2o.comp.module.vo.ObTableIndexVO;
+import com.small.o2o.comp.module.vo.ObTableInfoVO;
+import com.small.o2o.comp.module.vo.ObTablePartitionVO;
+import com.small.o2o.comp.module.vo.ObTablePrimaryKeyVO;
+import com.small.o2o.comp.module.vo.ObTableViewVO;
+import com.small.o2o.comp.module.vo.ObTypesVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,48 +42,49 @@ public class ObOracleMetaDataService implements MetaDbTypeSQLService {
 
 
     @Override
-    public String getDbType() {
-        return  DBType.OB_ORACLE.name();
+    public DBTypeEnum getDbType() {
+        return  DBTypeEnum.OB_ORACLE ;
     }
 
     @Override
-    public <T> List<T> getObjectList(DSQueryPramsVO pramsVO ,Class clazz) {
-        Assert.hasText(pramsVO.getQueryType(),"OB_ORACLE请求参数pramsVO缺少查询元数据类型queryType赋值!");
+    public <T> List<T> getObjectList(DsQueryPrams pramsVO , Class clazz) {
+        Assert.hasText(pramsVO.getMetaBuzType().name(),"OB_ORACLE请求参数pramsVO缺少查询元数据类型queryType赋值!");
         String sql = "";
-        switch (pramsVO.getQueryType()) {
-            case O2OConstants.SQL_OBJECT :
+        MetaBuzTypeEnum buzTypeEnum = pramsVO.getMetaBuzType();
+        switch (buzTypeEnum) {
+            case META_OBJECT :
                 sql = queryObjectInfoSQL();
                 break;
-            case O2OConstants.SQL_TABLE:
+            case META_TABLE :
                 sql = queryTableInfoSQL(pramsVO.getTableName());
                 break;
-            case O2OConstants.SQL_TABLE_COLUMN:
+            case META_TAB_COLUMNS:
                 sql = queryTableColumnFullVoSQL(pramsVO.getTableName());
                 break;
-            case O2OConstants.SQL_TABLE_INDEX:
+            case META_TAB_INDEX:
                 sql = queryTableIndexVoSQL(pramsVO.getTableName());
                 break;
-            case O2OConstants.SQL_TABLE_PRIMARYKEY:
+            case META_TAB_PRIMARY_KEY:
                 sql = queryTablePrimaryKeyVoSQL(pramsVO.getTableName());
                 break;
-            case O2OConstants.SQL_VIEW :
+            case META_TAB_VIEW :
                 sql = queryTableViewSQL();
                 break;
-            case O2OConstants.SQL_SEQUENCES:
+            case META_SEQUENCES:
                 sql = querySequencesVoSQL();
                 break;
-            case O2OConstants.SQL_TYPE:
-                sql = queryTypesVoSQL(pramsVO.getMetaType());
+            case META_TYPE:
+                sql = queryTypesVoSQL(pramsVO.getQueryParam());
                 break;
-            case O2OConstants.SQL_FUNCTION:
-            case O2OConstants.SQL_PROCEDURE:
-            case O2OConstants.SQL_PACKAGE:
-                sql = queryProcedureVoSQL(pramsVO.getMetaType());
+            //case META_FUNCTION:
+            case META_PROCEDURE:
+            //case META_PACKAGE:
+                sql = queryProcedureVoSQL(pramsVO.getQueryParam());
                 break;
             default:
                 throw new BussinessException("不支持的元数据枚举查询");
         }
-        System.out.println("OB_ORACLE "+pramsVO.getQueryType()+" >>> SQL \n " + sql);
+        System.out.println("OB_ORACLE "+pramsVO.getMetaBuzType().getCode()+" >>> SQL \n " + sql);
         return jdbcTemplateService.queryForList(sql, clazz);
      }
 
@@ -148,13 +160,15 @@ public class ObOracleMetaDataService implements MetaDbTypeSQLService {
 
     @Override
     public String queryTablePrimaryKeyVoSQL(String tableName) {
-        String sql = "select cu.TABLE_NAME ,cu.CONSTRAINT_NAME ,LISTAGG(cu.COLUMN_NAME, ',')WITHIN GROUP(ORDER BY cu.TABLE_NAME,cu.COLUMN_NAME) as COLUMN_NAME " +
-                "from user_cons_columns cu, user_constraints au where cu.constraint_name = au.constraint_name and au.constraint_type = 'P' " ;
-
-        if (StringUtils.hasText(tableName)){
-            sql += " AND cu.TABLE_NAME = '"+tableName+"'" ;
+        String sql = "SELECT CU.TABLE_NAME ,CU.CONSTRAINT_NAME ,\n" +
+                "       LISTAGG(CU.COLUMN_NAME, ',')WITHIN GROUP(ORDER BY CU.TABLE_NAME,CU.COLUMN_NAME) AS COLUMN_NAME\n" +
+                "FROM USER_CONS_COLUMNS CU, USER_CONSTRAINTS AU \n" +
+                "WHERE CU.CONSTRAINT_NAME = AU.CONSTRAINT_NAME AND AU.CONSTRAINT_TYPE = 'P'\n" +
+                "AND CU.TABLE_NAME NOT LIKE 'BIN$' \n";
+        if (StringUtils.hasText(tableName)) {
+            sql += " and cu.table_name = '" + tableName + "'";
         }
-        sql += " GROUP BY  cu.TABLE_NAME,cu.CONSTRAINT_NAME ORDER BY cu.TABLE_NAME, cu.CONSTRAINT_NAME " ;
+        sql += "GROUP BY  CU.TABLE_NAME,CU.CONSTRAINT_NAME ORDER BY CU.TABLE_NAME, CU.CONSTRAINT_NAME ";
         return sql;
     }
 

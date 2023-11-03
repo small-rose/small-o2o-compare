@@ -1,7 +1,8 @@
 package com.small.o2o.comp.module.service.sql;
 
 import com.small.o2o.comp.config.annotation.DynamicDataSource;
-import com.small.o2o.comp.module.vo.DSQueryPramsVO;
+import com.small.o2o.comp.core.enums.DBTypeEnum;
+import com.small.o2o.comp.module.param.DsQueryPrams;
 import com.small.o2o.comp.module.vo.IndexExpressions;
 import com.small.o2o.comp.module.vo.ObObjectInfoVO;
 import com.small.o2o.comp.module.vo.ObProcedureVO;
@@ -29,7 +30,7 @@ public interface MetaDbTypeSQLService {
      * 获取实现类支持的数据库类型  O2OConstants.DBType
      * @return
      */
-    public String getDbType();
+    public DBTypeEnum getDbType();
 
 
     /**
@@ -41,7 +42,7 @@ public interface MetaDbTypeSQLService {
      * @return
      */
     @DynamicDataSource
-    public <T> List<T> getObjectList(DSQueryPramsVO pramsVO, Class clazz);
+    public <T> List<T> getObjectList(DsQueryPrams pramsVO, Class clazz);
 
     /**
      * 查基本的对象信息

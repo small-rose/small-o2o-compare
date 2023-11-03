@@ -1,16 +1,14 @@
 package com.small.o2o.comp.module.service.oracle;
 
 
-import com.small.o2o.comp.core.constants.O2OConstants;
+import com.small.o2o.comp.core.enums.MetaBuzTypeEnum;
+import com.small.o2o.comp.module.param.DsCompareParam;
+import com.small.o2o.comp.module.param.DsQueryPrams;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
-import com.small.o2o.comp.module.vo.DSCompareVO;
-import com.small.o2o.comp.module.vo.DSQueryPramsVO;
 import com.small.o2o.comp.module.vo.ObTableInfoVO;
 import com.small.o2o.comp.module.vo.ObTablePartitionVO;
-import com.small.o2o.comp.module.vo.ObTableViewVO;
 import com.small.o2o.comp.module.vo.OracleTableInfoVO;
-import com.small.o2o.comp.module.vo.OracleTableViewVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,18 +31,18 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class TableListService  implements BuzTypeService {
+public class MetaTableListService implements MetaBuzTypeService {
 
     @Autowired
     private QueryMetaDataService queryMetaService;
 
     @Override
-    public String getBuzType() {
-        return O2OConstants.MetaBuzTypeEnum.TABLE_INFO.getCode();
+    public MetaBuzTypeEnum getBuzType() {
+        return MetaBuzTypeEnum.META_TABLE;
     }
 
     @Override
-    public  List getCompareMetaList(DSQueryPramsVO queryPramsVO, Class clazz) {
+    public  List getCompareMetaList(DsQueryPrams queryPramsVO) {
         return getTableInfo();
     }
 
@@ -54,10 +52,10 @@ public class TableListService  implements BuzTypeService {
      * @return
      */
     public List<OracleTableInfoVO> getTableInfo( ) {
-        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
+        DsCompareParam dscVO = MetaDataContextHolder.getDsCompare();
 
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
+        DsQueryPrams queryPramsVO = DsQueryPrams.builder().metaBuzType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
+        DsQueryPrams queryPramsVO2 = DsQueryPrams.builder().metaBuzType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
 
         List<ObTableInfoVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
         List<ObTableInfoVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObTableInfoVO.class);
@@ -164,73 +162,5 @@ public class TableListService  implements BuzTypeService {
         return resultList;
     }
 
-    /**
-     *  视图查询比较结果
-     * @return
-     */
-    public List<OracleTableViewVO> getTableViewList() {
-        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
 
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
-
-        List<ObTableViewVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableViewVO.class);
-        List<ObTableViewVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObTableViewVO.class);
-
-        Map<String, ObTableViewVO> obObjMap = null;
-        Map<String, ObTableViewVO> oracleObjMap = null;
-        if (!ObjectUtils.isEmpty(obObjList)) {
-            obObjMap = obObjList.stream().collect(
-                    Collectors.toMap(ObTableViewVO::getViewName, e->e ,(oldVal, newVal) -> oldVal));
-        }
-        if (!ObjectUtils.isEmpty(oraObjList)) {
-            oracleObjMap = oraObjList.stream().collect(
-                    Collectors.toMap(o -> o.getViewName(), Function.identity(),(oldVal, newVal) -> oldVal));
-        }
-
-
-        List<String> allTables = new ArrayList<>();
-        if (!ObjectUtils.isEmpty(obObjList)) {
-            for (ObTableViewVO obTableInfoVO : obObjList) {
-                allTables.add(obTableInfoVO.getViewName());
-
-            }
-        }
-        if (!ObjectUtils.isEmpty(oraObjList)) {
-            for (ObTableViewVO obTableInfoVO : oraObjList) {
-                if (!allTables.contains(obTableInfoVO.getViewName())) {
-                    allTables.add(obTableInfoVO.getViewName());
-                }
-            }
-        }
-
-
-        List<OracleTableViewVO> resultList = new ArrayList<>();
-        OracleTableViewVO object = null;
-        int indexNo = 1;
-        log.info("getTableInfo 取并集大小为：" + allTables.size());
-        for (String n : allTables) {
-            object = new OracleTableViewVO();
-            object.setNo(String.valueOf(indexNo));
-            object.setNo2(String.valueOf(indexNo));
-            ObTableViewVO obTiv = obObjMap.get(n);
-            ObTableViewVO oracleTiv = oracleObjMap.get(n);
-
-            if (obTiv != null) {
-                ObTableViewVO ob = obTiv;
-                object.setViewName(ob.getViewName());
-                object.setTextLength(ob.getTextLength());
-                object.setText(ob.getText());
-            }
-            if (oracleTiv != null ) {
-                ObTableViewVO oracle = oracleTiv;
-                object.setViewName2(oracle.getViewName());
-                object.setTextLength2(oracle.getTextLength());
-                object.setText2(oracle.getText());
-            }
-            resultList.add(object);
-            indexNo++;
-        }
-        return resultList;
-    }
 }

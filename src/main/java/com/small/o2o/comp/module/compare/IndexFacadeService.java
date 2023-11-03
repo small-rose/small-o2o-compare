@@ -4,12 +4,12 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.metadata.Sheet;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import com.small.o2o.comp.core.constants.O2OConstants;
+import com.small.o2o.comp.core.enums.MetaBuzTypeEnum;
 import com.small.o2o.comp.core.excel.CheckCellHandler;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
-import com.small.o2o.comp.module.service.oracle.ObjectInfoService;
-import com.small.o2o.comp.module.service.oracle.TableIndexService;
-import com.small.o2o.comp.module.service.oracle.TablePrimaryKeyService;
+import com.small.o2o.comp.module.service.oracle.MetaObjectListService;
+import com.small.o2o.comp.module.service.oracle.MetaTableIndexService;
+import com.small.o2o.comp.module.service.oracle.MetaTablePrimaryKeyService;
 import com.small.o2o.comp.module.vo.OracleObjectInfoVO;
 import com.small.o2o.comp.module.vo.OracleTableIndexVO;
 import com.small.o2o.comp.module.vo.OracleTablePrimaryKeyVO;
@@ -28,11 +28,11 @@ import java.util.List;
 @Slf4j
  public class IndexFacadeService {
     @Autowired
-    private ObjectInfoService objectInfoService ;
+    private MetaObjectListService objectInfoService ;
     @Autowired
-    private TableIndexService tableIndexService ;
+    private MetaTableIndexService tableIndexService ;
     @Autowired
-    private TablePrimaryKeyService tablePrimaryKeyService ;
+    private MetaTablePrimaryKeyService tablePrimaryKeyService ;
     @Autowired
     private FilePickService filePickService ;
 
@@ -112,7 +112,7 @@ import java.util.List;
         //List<Integer> indexList = Arrays.asList(0, 4);
         for (int index : indexList) {
 
-            O2OConstants.MetaBuzTypeEnum sheetEnum = O2OConstants.MetaBuzTypeEnum.getSheetNameEnum(index);
+            MetaBuzTypeEnum sheetEnum = MetaBuzTypeEnum.getSheetNameEnum(index);
             if (sheetEnum==null){
                 continue;
             }

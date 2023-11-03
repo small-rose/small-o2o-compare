@@ -1,7 +1,7 @@
 package com.small.o2o.comp.config.aop;
 
 import com.small.o2o.comp.config.datasource.DynamicDSContextHolder;
-import com.small.o2o.comp.module.vo.DSQueryPramsVO;
+import com.small.o2o.comp.module.param.DsQueryPrams;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -32,7 +32,7 @@ public class DataSourceAop {
     public Object arroundService(ProceedingJoinPoint joinPoint) throws Throwable {
         try {
             Object[] args = joinPoint.getArgs();
-            DSQueryPramsVO queryPramsVO = (DSQueryPramsVO) args[0];
+            DsQueryPrams queryPramsVO = (DsQueryPrams) args[0];
             DynamicDSContextHolder.setDataSourceType(queryPramsVO.getDataSourceName());
         }catch (Exception e){
             e.printStackTrace();

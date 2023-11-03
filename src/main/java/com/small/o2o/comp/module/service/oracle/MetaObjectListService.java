@@ -1,11 +1,11 @@
 package com.small.o2o.comp.module.service.oracle;
 
 
-import com.small.o2o.comp.core.constants.O2OConstants;
+import com.small.o2o.comp.core.enums.MetaBuzTypeEnum;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
-import com.small.o2o.comp.module.vo.DSCompareVO;
-import com.small.o2o.comp.module.vo.DSQueryPramsVO;
+import com.small.o2o.comp.module.param.DsCompareParam;
+import com.small.o2o.comp.module.param.DsQueryPrams;
 import com.small.o2o.comp.module.vo.ObObjectInfoVO;
 import com.small.o2o.comp.module.vo.OracleObjectInfoVO;
 import lombok.extern.slf4j.Slf4j;
@@ -26,32 +26,32 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class ObjectInfoService implements BuzTypeService {
+public class MetaObjectListService implements MetaBuzTypeService {
 
     @Autowired
     private QueryMetaDataService queryMetaService;
     @Override
-    public String getBuzType() {
-        return O2OConstants.MetaBuzTypeEnum.OBJECT_INFO.getCode();
+    public MetaBuzTypeEnum getBuzType() {
+        return  MetaBuzTypeEnum.META_OBJECT;
     }
 
     @Override
-    public List<OracleObjectInfoVO> getCompareMetaList(DSQueryPramsVO queryPramsVO, Class clazz) {
+    public List<OracleObjectInfoVO> getCompareMetaList(DsQueryPrams queryPramsVO) {
         return getObjectInfo();
     }
 
     public List<OracleObjectInfoVO> getObjectInfo() {
 
-        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
+        DsCompareParam dscVO = MetaDataContextHolder.getDsCompare();
 
         //DynamicDSContextHolder.setDataSourceType(dscVO.getDsFirst());
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
+        DsQueryPrams queryPramsVO = DsQueryPrams.builder().metaBuzType(getBuzType()).dataSourceName(dscVO.getDsFirst()).build();
         //List<ObObjectInfoVO> objectVOList = queryMetaService.getObjectInfo(queryPramsVO);
         List<ObObjectInfoVO> objectVOList = queryMetaService.queryObjectList(queryPramsVO, ObObjectInfoVO.class);
         //DynamicDSContextHolder.removeDataSourceType();
 
         //DynamicDSContextHolder.setDataSourceType(dscVO.getDsSecond());
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
+        DsQueryPrams queryPramsVO2 = DsQueryPrams.builder().metaBuzType(getBuzType()).dataSourceName(dscVO.getDsSecond()).build();
         List<ObObjectInfoVO> objectVOList2 = queryMetaService.queryObjectList(queryPramsVO2, ObObjectInfoVO.class);
         //DynamicDSContextHolder.removeDataSourceType();
 

@@ -1,6 +1,6 @@
 package com.small.o2o.comp.module.service.meta;
 
-import com.small.o2o.comp.module.vo.DSCompareVO;
+import com.small.o2o.comp.module.param.DsCompareParam;
 import com.small.o2o.comp.module.vo.ObTableInfoVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ public class MetaDataContextHolder {
      */
     private static final ThreadLocal<List<ObTableInfoVO>> tableHolder = new ThreadLocal<>();
 
-    private static final ThreadLocal<DSCompareVO> dsCompareHolder = new ThreadLocal<>();
+    private static final ThreadLocal<DsCompareParam> dsCompareHolder = new ThreadLocal<>();
 
     /**
      * 设置当前线程的数据源变量
@@ -51,15 +51,15 @@ public class MetaDataContextHolder {
     /**
      * 设置当前线程的数据源变量
      */
-    public static void setDsCompare(DSCompareVO tableList) {
-        log.info("已缓存到{}数据", tableList);
-        dsCompareHolder.set(tableList);
+    public static void setDsCompare(DsCompareParam dsCompare) {
+        log.info("已缓存到dsCompare{}数据", dsCompare);
+        dsCompareHolder.set(dsCompare);
     }
 
     /**
      * 获取当前线程的数据源变量
      */
-    public static DSCompareVO getDsCompare() {
+    public static DsCompareParam getDsCompare() {
         return  dsCompareHolder.get();
     }
 

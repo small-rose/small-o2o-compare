@@ -2,7 +2,7 @@ package com.small.o2o.comp.config.datasource;
 
 import com.alibaba.fastjson2.JSON;
 import com.small.o2o.comp.config.pojo.DataSourceInfo;
-import com.small.o2o.comp.core.enums.DBType;
+import com.small.o2o.comp.core.enums.DBTypeEnum;
 import com.small.o2o.comp.core.exception.DataCheckException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ public class InitDataSourceType {
     private InitDataSource initDataSource;
 
     @Getter
-    private HashMap dataSourceTypeMap = new HashMap();
+    private HashMap<String, DBTypeEnum> dataSourceTypeMap = new HashMap();
 
     @PostConstruct
     public void initializeDataSources() {
@@ -36,18 +36,18 @@ public class InitDataSourceType {
         List<DataSourceInfo>  dataSourceConfigs = initDataSource.getDataSourceList();
         dataSourceConfigs.stream().forEach(d->{
              System.out.println(" 解析到数据源 >>> "+JSON.toJSONString(d));
-            if(d.getDbType().toUpperCase().contains(DBType.ORACLE.name())) {
-                dataSourceTypeMap.put(d.getName().toUpperCase(),  DBType.ORACLE.name());
-                log.info("Init dbType >>> 识别到自定义的数据源数据库类型>>> "+DBType.ORACLE.name());
-            }else  if(d.getDbType().toUpperCase().contains(DBType.OB_ORACLE.name())) {
-                dataSourceTypeMap.put(d.getName().toUpperCase(), DBType.OB_ORACLE.name());
-                log.info("Init dbType >>> 识别到自定义的数据源数据库类型>>> "+DBType.OB_ORACLE.name());
-            }else  if(d.getDbType().toUpperCase().contains(DBType.MYSQL.name())) {
-                dataSourceTypeMap.put(d.getName().toUpperCase(), DBType.MYSQL.name());
-                log.info("Init dbType >>> 识别到自定义的数据源数据库类型>>> "+DBType.MYSQL.name());
-            }else  if(d.getDbType().toUpperCase().contains(DBType.OB_MYSQL.name())) {
-                dataSourceTypeMap.put(d.getName().toUpperCase(), DBType.OB_MYSQL.name());
-                log.info("Init dbType >>> 识别到自定义的数据源数据库类型>>> "+DBType.OB_MYSQL.name());
+            if(d.getDbType().toUpperCase().contains(DBTypeEnum.ORACLE.name())) {
+                dataSourceTypeMap.put(d.getName().toUpperCase(),  DBTypeEnum.ORACLE);
+                log.info("Init dbType >>> 识别到自定义的数据源数据库类型>>> "+ DBTypeEnum.ORACLE);
+            }else  if(d.getDbType().toUpperCase().contains(DBTypeEnum.OB_ORACLE.name())) {
+                dataSourceTypeMap.put(d.getName().toUpperCase(), DBTypeEnum.OB_ORACLE);
+                log.info("Init dbType >>> 识别到自定义的数据源数据库类型>>> "+ DBTypeEnum.OB_ORACLE);
+            }else  if(d.getDbType().toUpperCase().contains(DBTypeEnum.MYSQL.name())) {
+                dataSourceTypeMap.put(d.getName().toUpperCase(), DBTypeEnum.MYSQL);
+                log.info("Init dbType >>> 识别到自定义的数据源数据库类型>>> "+ DBTypeEnum.MYSQL);
+            }else  if(d.getDbType().toUpperCase().contains(DBTypeEnum.OB_MYSQL.name())) {
+                dataSourceTypeMap.put(d.getName().toUpperCase(), DBTypeEnum.OB_MYSQL);
+                log.info("Init dbType >>> 识别到自定义的数据源数据库类型>>> "+ DBTypeEnum.OB_MYSQL);
             }else {
                 throw new DataCheckException("目前支持配置的数据源dbType枚举[ORACLE,OB_ORACLE,MYSQL,OB_MYSQL],读取到非法配置："+d.getDbType());
             }

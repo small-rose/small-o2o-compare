@@ -5,21 +5,23 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.metadata.Sheet;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import com.small.o2o.comp.core.constants.O2OConstants;
+import com.small.o2o.comp.core.enums.MetaBuzTypeEnum;
 import com.small.o2o.comp.core.excel.CheckCellHandler;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
 import com.small.o2o.comp.module.compare.base.MetaDataCompare;
+import com.small.o2o.comp.module.param.DsCompareParam;
+import com.small.o2o.comp.module.param.DsQueryPrams;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
-import com.small.o2o.comp.module.service.oracle.ObjectInfoService;
-import com.small.o2o.comp.module.service.oracle.ProcedureListService;
-import com.small.o2o.comp.module.service.oracle.SequencesService;
-import com.small.o2o.comp.module.service.oracle.TableColumnService;
-import com.small.o2o.comp.module.service.oracle.TableColumnStreamService;
-import com.small.o2o.comp.module.service.oracle.TableIndexService;
-import com.small.o2o.comp.module.service.oracle.TableListService;
-import com.small.o2o.comp.module.service.oracle.TablePrimaryKeyService;
-import com.small.o2o.comp.module.service.oracle.TypeListService;
-import com.small.o2o.comp.module.vo.DSCompareVO;
+import com.small.o2o.comp.module.service.oracle.MetaObjectListService;
+import com.small.o2o.comp.module.service.oracle.MetaProcedureListService;
+import com.small.o2o.comp.module.service.oracle.MetaSequenceListService;
+import com.small.o2o.comp.module.service.oracle.MetaTableColumnStreamService;
+import com.small.o2o.comp.module.service.oracle.MetaTableIndexService;
+import com.small.o2o.comp.module.service.oracle.MetaTableListService;
+import com.small.o2o.comp.module.service.oracle.MetaTablePrimaryKeyService;
+import com.small.o2o.comp.module.service.oracle.MetaTableViewListService;
+import com.small.o2o.comp.module.service.oracle.MetaTypeListService;
+import com.small.o2o.comp.module.service.oracle.QueryBuzTypeService;
 import com.small.o2o.comp.module.vo.OracleObjectInfoVO;
 import com.small.o2o.comp.module.vo.OracleProcedureVO;
 import com.small.o2o.comp.module.vo.OracleSequencesVO;
@@ -51,37 +53,64 @@ import java.util.List;
 @Service
 public class CompareMetaDataService extends MetaDataCompare {
     @Autowired
-    private ObjectInfoService objectInfoService ;
+    private MetaObjectListService objectInfoService ;
     @Autowired
-    private TableListService tableListService ;
+    private MetaTableListService tableListService ;
     @Autowired
-    private TableColumnService tableColumnService ;
+    private MetaTableViewListService tableViewListService ;
     @Autowired
-    private TableColumnStreamService tableColumnStreamService ;
+    private MetaTableColumnStreamService tableColumnStreamService ;
     @Autowired
-    private TablePrimaryKeyService tablePrimaryKeyService ;
+    private MetaTablePrimaryKeyService tablePrimaryKeyService ;
     @Autowired
-    private TableIndexService tableIndexService ;
+    private MetaTableIndexService tableIndexService ;
     @Autowired
-    private SequencesService sequencesService ;
+    private MetaSequenceListService sequencesService ;
     @Autowired
-    private TypeListService typeListService ;
+    private MetaTypeListService typeListService ;
     @Autowired
-    private ProcedureListService procedureListService ;
+    private MetaProcedureListService procedureListService ;
+
+    @Autowired
+    QueryBuzTypeService queryBuzTypeService;
 
     @Override
     protected boolean check() {
-        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
+        DsCompareParam dscVO = MetaDataContextHolder.getDsCompare();
         Assert.notNull(dscVO, "请初始化比较参数DSCompareVO实例。");
         Assert.hasText(dscVO.getDsFirst(), "请设定比较的数据源名称dsFirst。");
         Assert.hasText(dscVO.getDsSecond(), "请设定比较的数据源名称dsSecond。");
         return true ;
     }
-
     @Override
     protected List<MultipleSheelPropety> queryData() {
         ArrayList<MultipleSheelPropety> excelList = new ArrayList<>();
-        for (O2OConstants.MetaBuzTypeEnum sheetEnum : O2OConstants.MetaBuzTypeEnum.values()) {
+
+        DsQueryPrams params = DsQueryPrams.builder().build();
+        for (MetaBuzTypeEnum buzTypeEnum :  MetaBuzTypeEnum.values()) {
+
+            params.setMetaBuzType(buzTypeEnum);
+            if (MetaBuzTypeEnum.META_FUNCTION.equals(buzTypeEnum) || MetaBuzTypeEnum.META_PROCEDURE.equals(buzTypeEnum)
+                    || MetaBuzTypeEnum.META_PACKAGE.equals(buzTypeEnum)) {
+                params.setQueryParam(buzTypeEnum.getCode());
+            }
+            List tableInfoList = queryBuzTypeService.getCompareMetaList(params);
+            Sheet sheet = new Sheet(buzTypeEnum.getIndex(), 0);
+            sheet.setSheetName(buzTypeEnum.getDesc());
+            MultipleSheelPropety multipleSheelPropety = new MultipleSheelPropety();
+            multipleSheelPropety.setData(tableInfoList);
+            multipleSheelPropety.setSheet(sheet);
+            excelList.add(multipleSheelPropety);
+        }
+        return excelList;
+    }
+
+
+
+    protected List<MultipleSheelPropety> queryData1() {
+        ArrayList<MultipleSheelPropety> excelList = new ArrayList<>();
+        for (MetaBuzTypeEnum sheetEnum :  MetaBuzTypeEnum.values()) {
+
 
             if (0 == sheetEnum.getIndex()) {
                 log.info("开始查0 " + sheetEnum.getDesc());
@@ -119,7 +148,7 @@ public class CompareMetaDataService extends MetaDataCompare {
             } else if (3 == sheetEnum.getIndex()) {
                 log.info("开始查" + sheetEnum.getDesc());
                 //
-                List<OracleTableViewVO> tableInfoList = tableListService.getTableViewList();
+                List<OracleTableViewVO> tableInfoList = tableViewListService.getTableViewList();
                 Sheet sheet = new Sheet(sheetEnum.getIndex(), 0);
                 sheet.setSheetName(sheetEnum.getDesc());
                 MultipleSheelPropety multipleSheelPropety = new MultipleSheelPropety();

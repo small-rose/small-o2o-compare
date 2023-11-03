@@ -2,24 +2,24 @@ package com.small.o2o.comp.module.service.oracle;
 
 
 import cn.hutool.core.util.StrUtil;
-import com.small.o2o.comp.core.constants.O2OConstants;
+import com.small.o2o.comp.core.enums.MetaBuzTypeEnum;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
-import com.small.o2o.comp.module.vo.DSCompareVO;
-import com.small.o2o.comp.module.vo.DSQueryPramsVO;
+import com.small.o2o.comp.module.param.DsCompareParam;
+import com.small.o2o.comp.module.param.DsQueryPrams;
 import com.small.o2o.comp.module.vo.ObTableColumnFullVO;
+import com.small.o2o.comp.module.vo.ObTableInfoVO;
 import com.small.o2o.comp.module.vo.OracleTableColumnFullVO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -32,19 +32,20 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class TableColumnStreamService implements BuzTypeService {
+public class MetaTableColumnService implements MetaBuzTypeService {
 
 
     @Autowired
     private QueryMetaDataService queryMetaService;
 
     @Override
-    public String getBuzType() {
-        return O2OConstants.MetaBuzTypeEnum.TableColumnVO.getCode();
+    public MetaBuzTypeEnum getBuzType() {
+        return MetaBuzTypeEnum.NULL ;
+        //return O2OConstants.MetaBuzTypeEnum.TableColumnVO.getCode();
     }
 
     @Override
-    public  List getCompareMetaList(DSQueryPramsVO queryPramsVO, Class clazz) {
+    public  List getCompareMetaList(DsQueryPrams queryPramsVO) {
         return getTableColumnFulls();
     }
 
@@ -55,34 +56,53 @@ public class TableColumnStreamService implements BuzTypeService {
      * @return
      */
     public List<OracleTableColumnFullVO> getTableColumnFulls() {
-        List<OracleTableColumnFullVO> resultList = new ArrayList<>();
+        List<String> tableList = new ArrayList<>();
+        DsCompareParam dscVO = MetaDataContextHolder.getDsCompare();
+        List<ObTableInfoVO> allTableList = MetaDataContextHolder.getAllTableList();
 
-        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
         //重新查询
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().queryType(getBuzType())
+        DsQueryPrams queryPramsVO = DsQueryPrams.builder().metaBuzType(getBuzType())
                 .dataSourceName(dscVO.getDsFirst()).tableName(dscVO.getTable()).build();
 
         //重新查询
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().queryType(getBuzType())
+        DsQueryPrams queryPramsVO2 = DsQueryPrams.builder().metaBuzType(getBuzType())
                 .dataSourceName(dscVO.getDsSecond()).tableName(dscVO.getTable()).build();
+        if (CollectionUtils.isEmpty(allTableList)){
+            List<String> tempList = new ArrayList<>();
 
-        List<ObTableColumnFullVO> obLetList = queryMetaService.queryObjectList(queryPramsVO, ObTableColumnFullVO.class);
-        List<ObTableColumnFullVO> oraRightList = queryMetaService.queryObjectList(queryPramsVO2, ObTableColumnFullVO.class);
+            List<ObTableInfoVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
+            if (!ObjectUtils.isEmpty(obObjList)) {
+                obObjList.forEach(t -> tempList.add(t.getTableName()));
+            }
 
-        ConcurrentMap<String, List<ObTableColumnFullVO>> tabLeftMap = obLetList.parallelStream().collect(Collectors.groupingByConcurrent(ObTableColumnFullVO::getTableName));
-        ConcurrentMap<String, List<ObTableColumnFullVO>> tabRightMap = oraRightList.parallelStream().collect(Collectors.groupingByConcurrent(ObTableColumnFullVO::getTableName));
 
-        Set<String> allTableSet = new HashSet<>(tabLeftMap.keySet());
-        allTableSet.addAll(tabRightMap.keySet());
+            List<ObTableInfoVO> obObjList2 = queryMetaService.queryObjectList(queryPramsVO2, ObTableInfoVO.class);;
+            if (!ObjectUtils.isEmpty(obObjList2)) {
+                obObjList2.forEach(t -> tempList.add(t.getTableName()));
+            }
 
+            tableList = tempList.stream().distinct().collect(Collectors.toList());
+        } else {
+            for (ObTableInfoVO tableInfoVO : allTableList) {
+                tableList.add(tableInfoVO.getTableName());
+            }
+        }
+
+        List<OracleTableColumnFullVO> resultList = new ArrayList<>();
         List<String> allNames = new ArrayList<>();
         int tableNo = 1;
         OracleTableColumnFullVO object = null;
+        if (StringUtils.hasText(dscVO.getTable())){
+            queryPramsVO.setTableName(dscVO.getTable());
+            queryPramsVO2.setTableName(dscVO.getTable());
+        }
 
-        for (String tableName : allTableSet) {
 
-            List<ObTableColumnFullVO> obObjList = tabLeftMap.get(tableName);
-            List<ObTableColumnFullVO> oraObjList = tabRightMap.get(tableName);
+        for (String tableName : tableList) {
+            queryPramsVO.setTableName(tableName);
+            List<ObTableColumnFullVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableColumnFullVO.class);
+            queryPramsVO.setTableName(tableName);
+            List<ObTableColumnFullVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObTableColumnFullVO.class);
 
             Map<String, ObTableColumnFullVO> obObjMap = obObjList.stream().collect(
                     Collectors.toMap(o -> o.getTableName().concat(o.getColumnName()), (p) -> p));

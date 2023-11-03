@@ -1,7 +1,9 @@
 package com.small.o2o.comp.module.service.strategy;
 
 import com.small.o2o.comp.config.datasource.InitDataSourceType;
-import com.small.o2o.comp.module.service.oracle.BuzTypeService;
+import com.small.o2o.comp.core.enums.DBTypeEnum;
+import com.small.o2o.comp.core.enums.MetaBuzTypeEnum;
+import com.small.o2o.comp.module.service.oracle.MetaBuzTypeService;
 import com.small.o2o.comp.module.service.sql.MetaDbTypeSQLService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,13 +26,13 @@ public class ServiceStrategyFactory {
     private List<MetaDbTypeSQLService> metaDataServiceList ;
 
     @Autowired
-    private List<BuzTypeService> buzTypeServiceList ;
+    private List<MetaBuzTypeService> buzTypeServiceList ;
 
 
     @Autowired
     private InitDataSourceType dstConfig ;
 
-    private HashMap<String, String> dataSourceMap = new HashMap<>();
+    private HashMap<String, DBTypeEnum> dataSourceMap = new HashMap<>();
 
     @PostConstruct
     public void init(){
@@ -40,26 +42,13 @@ public class ServiceStrategyFactory {
 
     public MetaDbTypeSQLService getDbTypeServiceStrategy(String dataSourceName) {
 
-        String dsName = dataSourceMap.get(dataSourceName);
-        return metaDataServiceList.stream().filter(s->(dsName.equalsIgnoreCase(s.getDbType()))).findFirst().get();
-
-       /* if (O2OConstants.DBType.ORACLE.getValue().equals(dsName)) {
-            return oracleMetaDataService;
-        } else if (O2OConstants.DBType.OB_ORACLE.getValue().equals(dsName)) {
-            return obMetaDataService;
-        } else if (O2OConstants.DBType.MYSQL.getValue().equals(dsName)) {
-            return obMetaDataService;
-        } else if (O2OConstants.DBType.OB_MYSQL.getValue().equals(dsName)) {
-            return obMetaDataService;
-        }else {
-            // 默认策略
-            throw new BussinessException("不支持的数据库类型: "+dataSourceName);
-        }*/
+        DBTypeEnum dsName = dataSourceMap.get(dataSourceName);
+        return metaDataServiceList.stream().filter(s->(dsName.equals(s.getDbType()))).findFirst().get();
     }
 
 
-    public BuzTypeService getBuzTypeServiceStrategy(String buzType) {
+    public MetaBuzTypeService getBuzTypeServiceStrategy(MetaBuzTypeEnum buzType) {
 
-         return buzTypeServiceList.stream().filter(s->(buzType.equalsIgnoreCase(s.getBuzType()))).findFirst().get();
+         return buzTypeServiceList.stream().filter(s->(buzType.equals(s.getBuzType()))).findFirst().get();
     }
 }

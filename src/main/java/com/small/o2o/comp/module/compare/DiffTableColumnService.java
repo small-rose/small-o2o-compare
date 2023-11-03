@@ -3,8 +3,8 @@ package com.small.o2o.comp.module.compare;
 
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
-import com.small.o2o.comp.module.vo.DSCompareVO;
-import com.small.o2o.comp.module.vo.DSQueryPramsVO;
+import com.small.o2o.comp.module.param.DsCompareParam;
+import com.small.o2o.comp.module.param.DsQueryPrams;
 import com.small.o2o.comp.module.vo.ObTableInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +34,16 @@ public class DiffTableColumnService {
 
         compareMetaDataService.check();
 
-        DSCompareVO dscVO = MetaDataContextHolder.getDsCompare();
+        DsCompareParam dscVO = MetaDataContextHolder.getDsCompare();
 
         List<String> obNames = new ArrayList<>();
         List<String> oraNames = new ArrayList<>();
-        DSQueryPramsVO queryPramsVO = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsFirst()).tableName(dscVO.getTable()).build();
+        DsQueryPrams queryPramsVO = DsQueryPrams.builder().dataSourceName(dscVO.getDsFirst()).tableName(dscVO.getTable()).build();
 
 
         List<ObTableInfoVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
 
-        DSQueryPramsVO queryPramsVO2 = DSQueryPramsVO.builder().dataSourceName(dscVO.getDsSecond()).tableName(dscVO.getTable()).build();
+        DsQueryPrams queryPramsVO2 = DsQueryPrams.builder().dataSourceName(dscVO.getDsSecond()).tableName(dscVO.getTable()).build();
 
         List<ObTableInfoVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObTableInfoVO.class);
 

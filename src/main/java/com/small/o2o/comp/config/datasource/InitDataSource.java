@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 /**
  * @Project : small-o2o-compare
- * @Author : zhangzongyuan
+ * @Author : 张小菜
  * @Description : [ InitDataSource ] 说明：无
  * @Function :  功能说明：无
  * @Date ：2023/10/26 20:51
