@@ -11,7 +11,7 @@ public class OracleTableColumnVO extends ObTableColumnVO {
 
     @ExcelProperty(value = "ORA小计", index = 6)
     @ColumnWidth(value = 8)
-    private String count1 ;
+    private String count2 ;
 
     @ExcelProperty(value = "序号", index = 7)
     @ColumnWidth(value = 5)

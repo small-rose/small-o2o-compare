@@ -52,6 +52,8 @@ public interface MetaDbTypeSQLService {
 
     String queryTableInfoSQL(String tableName);
 
+    String queryTablePartitionVOSQL(String tableName);
+
     String queryTableColumnFullVoSQL(String tableName);
 
     String queryTableIndexVoSQL(String tableName);

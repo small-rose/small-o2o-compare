@@ -62,7 +62,7 @@ public class MetaSequenceListService implements MetaBuzTypeService {
         }
         if (!ObjectUtils.isEmpty(oraObjList)) {
             oraObjList.forEach(p -> {
-                if (allNames.contains(p.getSequenceName())) {
+                if (!allNames.contains(p.getSequenceName())) {
                     allNames.add(p.getSequenceName());
                 }
             });
@@ -71,7 +71,7 @@ public class MetaSequenceListService implements MetaBuzTypeService {
         List<OracleSequencesVO> resultList = new ArrayList<>();
         OracleSequencesVO sequences = null;
         int indexNo = 1;
-        log.info("getSequences 取并集大小为：" + allNames.size());
+        log.info("查询 {} 取并集大小为：{}", getBuzType() , allNames.size());
 
         for (String n : allNames) {
             sequences = new OracleSequencesVO();

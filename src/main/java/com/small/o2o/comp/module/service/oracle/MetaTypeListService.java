@@ -83,8 +83,8 @@ public class MetaTypeListService implements MetaBuzTypeService {
             }
             if (oraList.size() > 0) {
                 ObTypesVO oracle = oraList.get(0);
-                object.setTypeName(oracle.getTypeName());
-                object.setTypecode(oracle.getTypecode());
+                object.setTypeName2(oracle.getTypeName());
+                object.setTypecode2(oracle.getTypecode());
             }
             resultList.add(object);
             indexNo++;

@@ -21,12 +21,14 @@ public enum MetaBuzTypeEnum {
     META_TYPE(7, "TYPE","集合"),
     META_FUNCTION(8, "FUNCTION","函數"),
     META_PROCEDURE(9, "PROCEDURE","存储过程"),
-    META_PACKAGE(10, "PACKAGE","存过包"),
+    META_PACKAGE_LIST(10, "PACKAGE","包清单"),
+    META_PACKAGE_PROC(11, "PACKAGE","存过包"),
+    META_TAB_PARTITION(12, "META_TAB_PARTITION","分区表统计"),
 
-    NULL(11, "TABLE_CHA","查表"),
-    TABLE_CHA(12, "TABLE_CHA","查表"),
-    TABLE_COLUMN_CHA(13, "TABLE_COLUMN_CHA","查列"),
-    PACKAGE_NAME(14, "PACKAGE","包数量");
+    NULL(13, "TABLE_CHA","查表"),
+    TABLE_CHA(14, "TABLE_CHA","查表"),
+    TABLE_COLUMN_CHA(15, "TABLE_COLUMN_CHA","查列"),
+    PACKAGE_NAME(16, "PACKAGE","包数量");
 
 
     private int index ;

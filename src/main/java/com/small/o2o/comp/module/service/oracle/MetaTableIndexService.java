@@ -137,11 +137,11 @@ public class MetaTableIndexService implements MetaBuzTypeService {
             List<ObTableIndexVO> obObjList = tabLeftMap.get(tableName);
             List<ObTableIndexVO> oraObjList = tabRightMap.get(tableName);
 
-            System.out.println(i+" Table "+tableName+"  ob indexs " +obObjList.size() +" oracle indexs " +oraObjList.size());
             i++;
             if (ObjectUtils.isEmpty(obObjList) && ObjectUtils.isEmpty(oraObjList)){
                 continue;
             }
+
             List<String> allIndexs = new ArrayList<>();
 
             if(!ObjectUtils.isEmpty(obObjList)) {

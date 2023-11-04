@@ -76,10 +76,17 @@ public class OracleMetaDataService implements MetaDbTypeSQLService {
             case META_TYPE:
                 sql = queryTypesVoSQL(pramsVO.getQueryParam());
                 break;
+            case META_PACKAGE_LIST :
+                sql = queryPkgProcedureNameListSQL(pramsVO.getQueryParam());
+                break;
             //case META_FUNCTION:
             case META_PROCEDURE:
                 //case META_PACKAGE:
                 sql = queryProcedureVoSQL(pramsVO.getQueryParam());
+                break;
+            case META_TAB_PARTITION:
+                //case META_PACKAGE:
+                sql = queryTablePartitionVOSQL(pramsVO.getTableName());
                 break;
             default:
                 throw new BussinessException("不支持的元数据枚举查询"+pramsVO.getMetaBuzType());
@@ -101,8 +108,28 @@ public class OracleMetaDataService implements MetaDbTypeSQLService {
 
     @Override
     public String queryTableInfoSQL(String tableName) {
-        String sql = "SELECT t1.TABLE_NAME , t2.COMMENTS , t1.STATUS , t1.TEMPORARY  \n" +
+        String sql = "SELECT t1.TABLE_NAME , t2.COMMENTS as TABLE_COMMENT, t1.STATUS , t1.TEMPORARY ,T2.TABLE_TYPE  \n" +
                 "FROM USER_ALL_TABLES t1 join USER_TAB_COMMENTS t2 on t1.TABLE_NAME=t2.TABLE_NAME  WHERE T2.TABLE_TYPE='TABLE' ";
+        return sql;
+    }
+
+    @Override
+    public String queryTablePartitionVOSQL(String tableName) {
+        String sql = "SELECT X.TABLE_NAME, X.PART_TYPE, X.PART_COLUMN_NAME, X.SUBPART_TYPE, X.SUBPART_COLUMN_NAME, X.PARTITION_COUNT\n" +
+                "FROM (\n" +
+                "         SELECT P.TABLE_NAME,\n" +
+                "                P.PARTITIONING_TYPE    AS PART_TYPE,\n" +
+                "                K.COLUMN_NAME          AS PART_COLUMN_NAME,\n" +
+                "                P.SUBPARTITIONING_TYPE AS SUBPART_TYPE,\n" +
+                "                SK.COLUMN_NAME         AS SUBPART_COLUMN_NAME,\n" +
+                "                P.PARTITION_COUNT      AS PARTITION_COUNT\n" +
+                //"                --,P.OWNER\n" +
+                "         FROM USER_PART_TABLES P\n" +
+                "                  INNER JOIN USER_PART_KEY_COLUMNS K ON P.TABLE_NAME = K.NAME\n" +
+                "                  LEFT JOIN USER_SUBPART_KEY_COLUMNS SK ON K.NAME = SK.NAME\n" +
+                "     ) X\n" +
+                "where 1 = 1 -- AND X.OWNER= V_OWNER  \n" +  //-- DBA_TABLES 需要
+                "  AND x.TABLE_NAME not like 'BIN%' ";
         return sql;
     }
 
@@ -207,11 +234,11 @@ public class OracleMetaDataService implements MetaDbTypeSQLService {
 
     @Override
     public String queryPkgProcedureNameListSQL(String metaType) {
-        String sql = "SELECT OBJECT_TYPE, OBJECT_NAME, PROCEDURE_NAME FROM user_procedures  ";
-        if (StringUtils.hasText(metaType)) {
+        String sql = "SELECT distinct OBJECT_TYPE, OBJECT_NAME FROM USER_PROCEDURES  " ;
+        if (StringUtils.hasText(metaType)){
             sql = sql.concat("WHERE OBJECT_TYPE = '").concat(metaType.toUpperCase()).concat("' ");
         }
-        sql = sql.concat("order by OBJECT_TYPE, OBJECT_NAME, SUBPROGRAM_ID");
+        sql = sql.concat("order by OBJECT_TYPE, OBJECT_NAME");
         return sql;
     }
 
@@ -279,7 +306,7 @@ public class OracleMetaDataService implements MetaDbTypeSQLService {
      */
     @Override
     public List<ObTablePartitionVO> queryTablePartitionVO() {
-        String sql = "SELECT TABLE_NAME, COUNT(*) count FROM SYS.USER_TAB_PARTITIONS GROUP BY TABLE_NAME";
+        String sql = "SELECT TABLE_NAME, COUNT(*) as COUNT FROM SYS.USER_TAB_PARTITIONS GROUP BY TABLE_NAME";
         return jdbcTemplateService.queryForList(sql, ObTablePartitionVO.class);
     }
 

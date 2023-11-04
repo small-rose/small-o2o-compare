@@ -7,6 +7,7 @@ import com.alibaba.excel.metadata.Sheet;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.small.o2o.comp.core.enums.MetaBuzTypeEnum;
 import com.small.o2o.comp.core.excel.CheckCellHandler;
+import com.small.o2o.comp.core.excel.CustomRowHandler;
 import com.small.o2o.comp.core.excel.MultipleSheelPropety;
 import com.small.o2o.comp.module.compare.base.MetaDataCompare;
 import com.small.o2o.comp.module.param.DsCompareParam;
@@ -92,12 +93,20 @@ public class CompareMetaDataService extends MetaDataCompare {
             if (!buzTypeEnum.name().startsWith("META_")){
                 continue;
             }
+            if (MetaBuzTypeEnum.META_PACKAGE_LIST.equals(buzTypeEnum)){
+                System.out.println("111111111111111111111");
+            }
             params.setMetaBuzType(buzTypeEnum);
             if (MetaBuzTypeEnum.META_FUNCTION.equals(buzTypeEnum) || MetaBuzTypeEnum.META_PROCEDURE.equals(buzTypeEnum)
-                    || MetaBuzTypeEnum.META_PACKAGE.equals(buzTypeEnum)) {
+                    || MetaBuzTypeEnum.META_PACKAGE_PROC.equals(buzTypeEnum)) {
                 params.setQueryParam(buzTypeEnum.getCode());
                 params.setMetaBuzType(MetaBuzTypeEnum.META_PROCEDURE);
             }
+            if (MetaBuzTypeEnum.META_PACKAGE_LIST.equals(buzTypeEnum)){
+                params.setQueryParam(buzTypeEnum.getCode());
+
+            }
+            //System.out.println(JSON.toJSONString(params));
             List tableInfoList = queryBuzTypeService.getCompareMetaList(params);
             Sheet sheet = new Sheet(buzTypeEnum.getIndex(), 0);
             sheet.setSheetName(buzTypeEnum.getDesc());
@@ -229,7 +238,7 @@ public class CompareMetaDataService extends MetaDataCompare {
                     //这里 需要指定写用哪个class去写
                     WriteSheet writeSheet = EasyExcel.writerSheet(i, excelList.get(i).getSheet().getSheetName())
                             .head(excelList.get(i).getData().get(0).getClass())
-                            .registerWriteHandler(new CheckCellHandler(whiteListTable)).build();
+                            .registerWriteHandler(new CheckCellHandler(whiteListTable)).registerWriteHandler(new CustomRowHandler()).build();
                     excelWriter.write(excelList.get(i).getData(), writeSheet);
 
                 }
