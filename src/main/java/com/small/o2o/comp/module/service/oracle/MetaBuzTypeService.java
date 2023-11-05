@@ -29,4 +29,6 @@ public interface MetaBuzTypeService {
      * @return
      */
     <T> List<T> getCompareMetaList(DsQueryPrams queryPramsVO);
+
+
 }

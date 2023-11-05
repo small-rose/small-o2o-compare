@@ -3,6 +3,7 @@ package com.small.o2o.comp.module.service.oracle;
 
 import cn.hutool.core.util.StrUtil;
 import com.small.o2o.comp.core.enums.MetaBuzTypeEnum;
+import com.small.o2o.comp.core.utils.SmallUtils;
 import com.small.o2o.comp.module.service.meta.MetaDataContextHolder;
 import com.small.o2o.comp.module.service.meta.QueryMetaDataService;
 import com.small.o2o.comp.module.param.DsCompareParam;
@@ -19,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,7 +34,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class MetaTableColumnStreamService implements MetaBuzTypeService {
+public class MetaTableColumnStreamService extends MetaConditionTable implements MetaBuzTypeService {
 
 
     @Autowired
@@ -60,26 +62,45 @@ public class MetaTableColumnStreamService implements MetaBuzTypeService {
         DsCompareParam dscVO = MetaDataContextHolder.getDsCompare();
         //重新查询
         DsQueryPrams queryPramsVO = DsQueryPrams.builder().metaBuzType(getBuzType())
-                .dataSourceName(dscVO.getDsFirst()).tableName(dscVO.getTable()).build();
+                .dataSourceName(dscVO.getDsFirst()).build();
 
         //重新查询
         DsQueryPrams queryPramsVO2 = DsQueryPrams.builder().metaBuzType(getBuzType())
-                .dataSourceName(dscVO.getDsSecond()).tableName(dscVO.getTable()).build();
+                .dataSourceName(dscVO.getDsSecond()).build();
 
         List<ObTableColumnFullVO> obLetList = queryMetaService.queryObjectList(queryPramsVO, ObTableColumnFullVO.class);
         List<ObTableColumnFullVO> oraRightList = queryMetaService.queryObjectList(queryPramsVO2, ObTableColumnFullVO.class);
 
-        ConcurrentMap<String, List<ObTableColumnFullVO>> tabLeftMap = obLetList.parallelStream().collect(Collectors.groupingByConcurrent(ObTableColumnFullVO::getTableName));
-        ConcurrentMap<String, List<ObTableColumnFullVO>> tabRightMap = oraRightList.parallelStream().collect(Collectors.groupingByConcurrent(ObTableColumnFullVO::getTableName));
-
-        Set<String> allTableSet = new HashSet<>(tabLeftMap.keySet());
-        allTableSet.addAll(tabRightMap.keySet());
+        ConcurrentMap<String, List<ObTableColumnFullVO>> tabLeftMap = new ConcurrentHashMap<>();
+        ConcurrentMap<String, List<ObTableColumnFullVO>> tabRightMap = new ConcurrentHashMap<>();
+        Set<String> allTableSet = new HashSet<>();
+        if (SmallUtils.isNotEmpty(obLetList)) {
+            tabLeftMap = obLetList.parallelStream().collect(Collectors.groupingByConcurrent(ObTableColumnFullVO::getTableName));
+            allTableSet.addAll(tabLeftMap.keySet());
+        }
+        if (SmallUtils.isNotEmpty(oraRightList)) {
+            tabRightMap = oraRightList.parallelStream().collect(Collectors.groupingByConcurrent(ObTableColumnFullVO::getTableName));
+            allTableSet.addAll(tabRightMap.keySet());
+        }
+        // 进行数据过滤
+        Set<String> resultTabSet = new HashSet<>();
+        if (SmallUtils.isNotEmpty(includeList)) {
+            List<String> tempList = new ArrayList(allTableSet);
+            List<String> resultTableList = tempList.stream().filter(e -> includeList.contains(e)).collect(Collectors.toList());
+            resultTabSet.addAll(resultTableList);
+        }else if (SmallUtils.isNotEmpty(excludeList)){
+            List<String> tempList = new ArrayList(allTableSet);
+            List<String> resultTableList = tempList.stream().filter(e -> !excludeList.contains(e)).collect(Collectors.toList());
+            resultTabSet.addAll(resultTableList);
+        }else{
+            resultTabSet.addAll(allTableSet);
+        }
 
         List<String> allNames = new ArrayList<>();
         int tableNo = 1;
         OracleTableColumnFullVO object = null;
 
-        for (String tableName : allTableSet) {
+        for (String tableName : resultTabSet) {
 
             List<ObTableColumnFullVO> obObjList = tabLeftMap.get(tableName);
             List<ObTableColumnFullVO> oraObjList = tabRightMap.get(tableName);

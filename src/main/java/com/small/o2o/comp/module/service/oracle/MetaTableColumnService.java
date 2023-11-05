@@ -62,11 +62,11 @@ public class MetaTableColumnService implements MetaBuzTypeService {
 
         //重新查询
         DsQueryPrams queryPramsVO = DsQueryPrams.builder().metaBuzType(getBuzType())
-                .dataSourceName(dscVO.getDsFirst()).tableName(dscVO.getTable()).build();
+                .dataSourceName(dscVO.getDsFirst()).build();
 
         //重新查询
         DsQueryPrams queryPramsVO2 = DsQueryPrams.builder().metaBuzType(getBuzType())
-                .dataSourceName(dscVO.getDsSecond()).tableName(dscVO.getTable()).build();
+                .dataSourceName(dscVO.getDsSecond()).build();
         if (CollectionUtils.isEmpty(allTableList)){
             List<String> tempList = new ArrayList<>();
 
@@ -92,12 +92,6 @@ public class MetaTableColumnService implements MetaBuzTypeService {
         List<String> allNames = new ArrayList<>();
         int tableNo = 1;
         OracleTableColumnFullVO object = null;
-        if (StringUtils.hasText(dscVO.getTable())){
-            queryPramsVO.setTableName(dscVO.getTable());
-            queryPramsVO2.setTableName(dscVO.getTable());
-        }
-
-
         for (String tableName : tableList) {
             queryPramsVO.setTableName(tableName);
             List<ObTableColumnFullVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableColumnFullVO.class);

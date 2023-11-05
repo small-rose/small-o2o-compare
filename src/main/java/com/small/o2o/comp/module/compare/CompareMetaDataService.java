@@ -226,7 +226,9 @@ public class CompareMetaDataService extends MetaDataCompare {
     protected String generateExcel(String filePath, List<MultipleSheelPropety> excelList) {
         log.info("开始生成Excel ...");
         if (!filePath.endsWith(".xlsx")) {
-            String fileName = "元数据收集".concat(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmm"))).concat(".xlsx");
+            DsCompareParam dsCompare = MetaDataContextHolder.getDsCompare();
+            String fileName = "MetaCompare_".concat(dsCompare.getDsFirst()).concat("_").concat(dsCompare.getDsSecond()).concat("_")
+                    .concat(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmm"))).concat(".xlsx");
             filePath = filePath.endsWith(File.separator)? filePath : filePath.concat(File.separator) + fileName;
         }
         ExcelWriter excelWriter = null;

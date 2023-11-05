@@ -35,6 +35,8 @@ public class MetaObjectListService implements MetaBuzTypeService {
         return  MetaBuzTypeEnum.META_OBJECT;
     }
 
+
+
     @Override
     public List<OracleObjectInfoVO> getCompareMetaList(DsQueryPrams queryPramsVO) {
         return getObjectInfo();

@@ -22,7 +22,8 @@ public class CompareTest extends SmallO2oCompAppTest {
     @Test
     public void all(){
 
-        DsCompareParam vo = DsCompareParam.builder().dsFirst("ORACLE_DEV").dsSecond("ORACLE_SIT").build();
+        DsCompareParam vo = DsCompareParam.builder().dsFirst(CompareEnv.ORACLE_DEV.name())
+                .dsSecond(CompareEnv.ORACLE_SIT.name()).build();
         compareMetaDataService.doCompareHandler(vo);
     }
 
@@ -30,8 +31,15 @@ public class CompareTest extends SmallO2oCompAppTest {
     @Test
     public void oneTable(){
 
-        DsCompareParam vo = DsCompareParam.builder().dsFirst("ORACLE_DEV").dsSecond("ORACLE_SIT")
-                .table("").build();
+        DsCompareParam vo = DsCompareParam.builder().dsFirst("ORACLE_DEV").dsSecond("ORACLE_SIT").build();
         compareMetaDataService.doCompareHandler(vo);
+    }
+
+    enum CompareEnv{
+        ORACLE_DEV,
+        ORACLE_SIT,
+        OB_ORACLE_DEV,
+        OB_ORACLE_SIT;
+
     }
 }

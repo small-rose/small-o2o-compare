@@ -38,12 +38,12 @@ public class DiffTableColumnService {
 
         List<String> obNames = new ArrayList<>();
         List<String> oraNames = new ArrayList<>();
-        DsQueryPrams queryPramsVO = DsQueryPrams.builder().dataSourceName(dscVO.getDsFirst()).tableName(dscVO.getTable()).build();
+        DsQueryPrams queryPramsVO = DsQueryPrams.builder().dataSourceName(dscVO.getDsFirst()).build();
 
 
         List<ObTableInfoVO> obObjList = queryMetaService.queryObjectList(queryPramsVO, ObTableInfoVO.class);
 
-        DsQueryPrams queryPramsVO2 = DsQueryPrams.builder().dataSourceName(dscVO.getDsSecond()).tableName(dscVO.getTable()).build();
+        DsQueryPrams queryPramsVO2 = DsQueryPrams.builder().dataSourceName(dscVO.getDsSecond()).build();
 
         List<ObTableInfoVO> oraObjList = queryMetaService.queryObjectList(queryPramsVO2, ObTableInfoVO.class);
 

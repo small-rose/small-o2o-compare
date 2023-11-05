@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
+
 /**
  * @description: TODO 功能角色说明：
  * TODO 描述：
@@ -28,7 +30,14 @@ public class DsCompareParam {
      */
     private String dsSecond ;
 
-     private String table ;
+    /**
+     * 可选参数 [只比较includeTab范围内的表]
+     */
+    private List<String> includeTabList ;
+    /**
+     * 可応参数 [排除比较includeTab范围内的表]
+     */
+    private List<String> excludeTabList ;
 
     /**
      * 比较时可以以mainDs的数据为标准
