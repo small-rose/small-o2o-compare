@@ -1,7 +1,7 @@
 
 <div align="center">
 
-![](https://github.com/small-rose/small-o2o-compare/blob/main/o2o-logo.jpg)
+![](https://github.com/small-rose/small-o2o-compare/blob/main/o2o-logo.png)
 
 [![](https://img.shields.io/badge/blog-@small.rose-ff69b4.svg)](https://zhangxiaocai.cn)
 ![](https://img.shields.io/badge/java-@>=1.8-blueviolet.svg)
