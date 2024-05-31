@@ -1,3 +1,22 @@
+
+<div align="center">
+
+![](https://github.com/small-rose/small-o2o-compare/blob/main/o2o-logo.jpg)
+
+[![](https://img.shields.io/badge/blog-@small.rose-ff69b4.svg)](https://zhangxiaocai.cn)
+![](https://img.shields.io/badge/java-@>=1.8-blueviolet.svg)
+![](https://img.shields.io/badge/maven-@3.6.3-yellow.svg)
+![](https://img.shields.io/badge/springboot-@2.5.14-green.svg)
+![](https://img.shields.io/badge/druid-@1.2.6-critical.svg)
+![](https://img.shields.io/badge/lombok-@1.18.24-blue.svg)
+![](https://img.shields.io/badge/easyexcel-@2.2.8-skyblue.svg)
+![](https://img.shields.io/badge/oracle-@11gR2-blueviolet.svg)
+![](https://img.shields.io/badge/oceanbase-@3.2.3.3-yellow.svg)
+
+</div>
+
+--------------------
+
 # small-o2o-compare
 
 ## 诞生背景
